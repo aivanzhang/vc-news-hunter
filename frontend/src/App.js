@@ -1,9 +1,14 @@
 import { ChakraProvider } from "@chakra-ui/react";
-
+import { BrowserRouter, Routes, Route } from "react-router-dom";
+import Dashboard from "./screens/Dashboard";
 function App() {
   return (
     <ChakraProvider>
-      <div className="bg-blue-500 hover:bg-blue-600">Hello, world!</div>
+      <BrowserRouter>
+        <Routes>
+          <Route path="/" element={<Dashboard />} />
+        </Routes>
+      </BrowserRouter>
     </ChakraProvider>
   );
 }
