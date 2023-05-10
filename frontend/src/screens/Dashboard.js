@@ -1,48 +1,65 @@
-import { Box, Flex, Text } from "@chakra-ui/react";
+import { Box, Divider, HStack, Heading, Text, VStack } from "@chakra-ui/react";
 import Layout from "../components/Layout";
-
-const cardData = [
-  {
-    id: 1,
-    title: "Card 1",
-    description: "This is the description for card 1",
-  },
-  {
-    id: 2,
-    title: "Card 2",
-    description: "This is the description for card 2",
-  },
-  {
-    id: 3,
-    title: "Card 3",
-    description: "This is the description for card 3",
-  },
-];
+import SidePanel from "../components/SidePanel";
+import { useState } from "react";
+import { Link, useSearchParams } from "react-router-dom";
+import feed from "../rss.json";
 
 const Dashboard = () => {
+  const [searchParams, setSearchParams] = useSearchParams();
+  const newsSource = searchParams.get("source") ?? "all";
+  const [selectedSource, setSelectedSource] = useState(newsSource);
+
+  const setNewsSource = (source) => {
+    setSearchParams({ source });
+    setSelectedSource(source);
+  };
+
   return (
     <Layout>
-      <Box p={4}>
-        {cardData.map((card) => (
-          <Flex
-            key={card.id}
-            borderWidth="1px"
-            borderRadius="lg"
-            p={4}
-            mb={4}
-            alignItems="center"
-          >
-            <Box mr={4} className="relative flex h-3 w-3">
-              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
-              <span className="relative inline-flex rounded-full h-full w-full bg-green-500"></span>
-            </Box>
-            <Box>
-              <Text fontWeight="bold">{card.title}</Text>
-              <Text>{card.description}</Text>
-            </Box>
-          </Flex>
-        ))}
-      </Box>
+      <HStack
+        spacing={4}
+        display="flex"
+        flexDir="inline-flex"
+        className="h-[89vh] w-full"
+      >
+        <Box py={2} className="w-1/4" h="full" overflowY="scroll">
+          <SidePanel
+            newsSource={selectedSource}
+            setNewsSource={setNewsSource}
+          />
+        </Box>
+        <Divider orientation="vertical" />
+        <VStack
+          spacing={4}
+          p={2}
+          className="w-full"
+          h="full"
+          overflowY="scroll"
+        >
+          {feed.map((item) => (
+            <VStack
+              key={item.id}
+              borderRadius="md"
+              shadow="md"
+              p={4}
+              spacing={1}
+              onClick={() => window.open(item.link, "_blank")}
+              cursor="pointer"
+              w="full"
+              alignItems="flex-start"
+            >
+              <Heading as="h3" size="md">
+                {item.title}
+              </Heading>
+              <Text>{item.description}</Text>
+              <Text fontSize="sm" pt={4}>
+                {item.pubDate}
+              </Text>
+            </VStack>
+          ))}
+        </VStack>
+      </HStack>
     </Layout>
   );
 };
