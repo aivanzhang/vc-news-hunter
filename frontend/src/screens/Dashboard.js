@@ -2,7 +2,7 @@ import { Box, Divider, HStack, Heading, Text, VStack } from "@chakra-ui/react";
 import Layout from "../components/Layout";
 import SidePanel from "../components/SidePanel";
 import { useState } from "react";
-import { Link, useSearchParams } from "react-router-dom";
+import { useSearchParams } from "react-router-dom";
 import feed from "../rss.json";
 
 const Dashboard = () => {
@@ -11,6 +11,9 @@ const Dashboard = () => {
   const [selectedSource, setSelectedSource] = useState(newsSource);
 
   const setNewsSource = (source) => {
+    if (source === selectedSource) {
+      source = "all";
+    }
     setSearchParams({ source });
     setSelectedSource(source);
   };
