@@ -1,8 +1,17 @@
-import { Box, Divider, HStack, Heading, Text, VStack } from "@chakra-ui/react";
-import Layout from "../components/Layout";
-import SidePanel from "../components/SidePanel";
+import {
+  Box,
+  Divider,
+  HStack,
+  Heading,
+  IconButton,
+  Text,
+  VStack,
+} from "@chakra-ui/react";
 import { useEffect, useState } from "react";
 import { useSearchParams } from "react-router-dom";
+import { FiExternalLink } from "react-icons/fi";
+import Layout from "../components/Layout";
+import SidePanel from "../components/SidePanel";
 import feed from "../rss.json";
 
 const Dashboard = () => {
@@ -51,20 +60,43 @@ const Dashboard = () => {
               shadow="md"
               p={4}
               spacing={1}
-              onClick={() => window.open(item.link, "_blank")}
-              cursor="pointer"
               w="full"
               alignItems="flex-start"
             >
-              {selectedSource === "all" && (
-                <Text size="md" color="gray">
-                  {item.outlet}
-                </Text>
-              )}
-              <Heading as="h3" size="md">
-                {item.title}
-              </Heading>
-              <Text>{item.description}</Text>
+              <HStack
+                justifyContent="space-between"
+                alignItems="center"
+                w="full"
+              >
+                <VStack spacing={1} w="full" alignItems="flex-start">
+                  {selectedSource === "all" && (
+                    <Text size="md" color="gray">
+                      {item.outlet}
+                    </Text>
+                  )}
+                  <Heading
+                    as="h3"
+                    size="md"
+                    className="clickable"
+                    onClick={() => navigator.clipboard.writeText(item.title)}
+                    cursor="pointer"
+                  >
+                    {item.title}
+                  </Heading>
+                </VStack>
+                <IconButton
+                  icon={<FiExternalLink />}
+                  variant="ghost"
+                  onClick={() => window.open(item.link, "_blank")}
+                />
+              </HStack>
+              <Text
+                cursor="pointer"
+                className="clickable"
+                onClick={() => navigator.clipboard.writeText(item.description)}
+              >
+                {item.description}
+              </Text>
               <Text fontSize="sm" pt={4}>
                 <strong>{item.author}</strong> • {item.pubDate}
               </Text>

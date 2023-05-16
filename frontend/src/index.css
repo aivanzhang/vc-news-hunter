@@ -1,3 +1,19 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+.clickable {
+  cursor: pointer;
+}
+
+.clickable:hover {
+  color: lightgray;
+}
+
+.clickable:focus {
+  outline: none;
+}
+
+.clickable:active {
+  color: white;
+}
