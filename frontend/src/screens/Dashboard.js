@@ -13,6 +13,7 @@ import { FiExternalLink } from "react-icons/fi";
 import Layout from "../components/Layout";
 import SidePanel from "../components/SidePanel";
 import feed from "../rss.json";
+import SortSelect from "../components/SortSelect";
 
 const Dashboard = () => {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -46,13 +47,8 @@ const Dashboard = () => {
           />
         </Box>
         <Divider orientation="vertical" />
-        <VStack
-          spacing={4}
-          p={2}
-          className="w-full"
-          h="full"
-          overflowY="scroll"
-        >
+        <VStack spacing={4} p={2} w="full" h="full" overflowY="scroll">
+          <SortSelect />
           {feed.map((item) => (
             <VStack
               key={item.id}
