@@ -1,23 +1,29 @@
 [
   {
+    "id": 1,
     "title": "Biden Proposes $6 Trillion Budget to Boost Middle Class and Infrastructure",
     "link": "https://www.nytimes.com/2021/05/27/business/economy/biden-plan.html",
     "description": "President Biden proposed a $6 trillion budget on Friday that would increase spending to fuel economic growth and help America better compete with China.",
     "pubDate": "Fri, 28 May 2021 15:02:00 GMT",
-    "image": "https://static01.nyt.com/images/2021/05/27/business/27dc-biden-budget01sub/merlin_188397180_471bdb29-30dc-4b4c-a2d6-0335a28ee36f-superJumbo.jpg?quality=75&auto=webp"
+    "author": "John Smith",
+    "outlet": "The New York Times"
   },
   {
+    "id": 2,
     "title": "Israeli Airstrikes Kill Dozens in Gaza as Tensions Escalate",
     "link": "https://www.nytimes.com/live/2022/08/05/world/israel-gaza-airstrikes",
     "description": "Israel launched a wave of airstrikes in Gaza on Sunday, killing dozens of people and injuring hundreds, as tensions between Israel and Hamas continued to escalate.",
     "pubDate": "Sun, 16 May 2021 22:43:00 GMT",
-    "image": "https://static01.nyt.com/images/2022/08/05/world/05israel-gaza2/merlin_211077171_1ecea2c1-0e69-42ba-9bbf-015c98099aa4-superJumbo.jpg?quality=75&auto=webp"
+    "author": "Jane Doe",
+    "outlet": "The New York Times"
   },
   {
+    "id": 3,
     "title": "Elon Musk Tweets Support for Dogecoin, Sending Price Soaring",
     "link": "https://www.nytimes.com/2021/02/08/technology/dogecoin-bitcoin-elon-musk-snoop-dogg.html",
     "description": "Elon Musk tweeted his support for Dogecoin on Thursday, sending the cryptocurrency's price soaring by more than 20%.",
     "pubDate": "Thu, 20 May 2021 18:02:00 GMT",
-    "image": "https://static01.nyt.com/images/2021/02/09/business/08crypto1/merlin_183352905_3c703be1-7bda-4270-a28b-3a94bfc84aee-superJumbo.jpg?quality=75&auto=webp"
+    "author": "Benjamin Davis",
+    "outlet": "The New York Times"
   }
 ]
