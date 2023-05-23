@@ -5,11 +5,13 @@ from bs4 import BeautifulSoup
 import pprint
 import schedule
 import time
+from dateutil import parser
 
 # Set up MongoDB connection
 # Update with your MongoDB connection details
 client = MongoClient("mongodb://localhost:27017/")
 db = client["vc_news"]  # Name of the database
+collection = db["articles"]  # Name of the collection
 
 
 def fetch():
@@ -28,7 +30,6 @@ def fetch():
 
 
 def fetch_nyt():
-    collection = db["nyt"]
     url = "https://rss.nytimes.com/services/xml/rss/nyt/Technology.xml"
     feed = feedparser.parse(url)
 
@@ -41,7 +42,7 @@ def fetch_nyt():
         description = entry.description
         authors = [author.strip() for author in entry.author.split(",")]
         tags = [tag.term for tag in entry.tags]
-        pub_date = entry.published
+        pub_date = parser.parse(entry.published)
         article = {
             "title": title,
             "link": link,
@@ -49,12 +50,12 @@ def fetch_nyt():
             "tags": tags,
             "description": description,
             "pub_date": pub_date,
+            "outlet": "nyt",
         }
         collection.insert_one(article)
 
 
 def fetch_wsj():
-    collection = db["wsj"]
     url = [
         ("US Business", "https://feeds.a.dj.com/rss/WSJcomUSBusiness.xml"),
         ("Markets", "https://feeds.a.dj.com/rss/RSSMarketsMain.xml"),
@@ -72,8 +73,8 @@ def fetch_wsj():
             link = entry.link
             description = entry.summary
             tags = [tag]
-            authors = ""
-            pub_date = entry.published
+            authors = []
+            pub_date = parser.parse(entry.published)
             article = {
                 "title": title,
                 "link": link,
@@ -81,12 +82,12 @@ def fetch_wsj():
                 "tags": tags,
                 "description": description,
                 "pub_date": pub_date,
+                "outlet": "wsj",
             }
             collection.insert_one(article)
 
 
 def fetch_forbes():
-    collection = db["forbes"]
     url = "https://rss.app/feeds/gPewJbxDeu3FskgJ.xml"
     feed = feedparser.parse(url)
 
@@ -100,7 +101,7 @@ def fetch_forbes():
         description = soup.find("div").find("div").text.strip()
         authors = [author.strip() for author in entry.author.split(",")]
         tags = []
-        pub_date = entry.published
+        pub_date = parser.parse(entry.published)
         article = {
             "title": title,
             "link": link,
@@ -108,12 +109,12 @@ def fetch_forbes():
             "tags": tags,
             "description": description,
             "pub_date": pub_date,
+            "outlet": "forbes",
         }
         collection.insert_one(article)
 
 
 def fetch_wp():
-    collection = db["wp"]
     url = [
         (
             "Technology",
@@ -136,7 +137,7 @@ def fetch_wp():
             description = entry.summary
             authors = [author.strip() for author in entry.author.split(",")]
             tags = [tag]
-            pub_date = entry.published
+            pub_date = parser.parse(entry.published)
             article = {
                 "title": title,
                 "link": link,
@@ -144,12 +145,12 @@ def fetch_wp():
                 "tags": tags,
                 "description": description,
                 "pub_date": pub_date,
+                "outlet": "wp",
             }
             collection.insert_one(article)
 
 
 def fetch_information():
-    collection = db["information"]
     url = "https://www.theinformation.com/feed"
     feed = feedparser.parse(url)
 
@@ -165,7 +166,7 @@ def fetch_information():
         ).strip()
         authors = [author["name"] for author in entry.authors]
         tags = []
-        pub_date = entry.published
+        pub_date = parser.parse(entry.published)
         article = {
             "title": title,
             "link": link,
@@ -173,12 +174,12 @@ def fetch_information():
             "tags": tags,
             "description": description,
             "pub_date": pub_date,
+            "outlet": "information",
         }
         collection.insert_one(article)
 
 
 def fetch_information_kate():
-    collection = db["information_kate"]
     url = "https://rss.app/feeds/OcSi0UxY1CKCIEpa.xml"
     feed = feedparser.parse(url)
 
@@ -192,7 +193,7 @@ def fetch_information_kate():
         description = soup.find("div").find("div").text.strip()
         authors = [author["name"] for author in entry.authors]
         tags = []
-        pub_date = entry.published
+        pub_date = parser.parse(entry.published)
         article = {
             "title": title,
             "link": link,
@@ -200,12 +201,12 @@ def fetch_information_kate():
             "tags": tags,
             "description": description,
             "pub_date": pub_date,
+            "outlet": "information_kate",
         }
         collection.insert_one(article)
 
 
 def fetch_cnbc():
-    collection = db["cnbc"]
     url = [
         (
             "Top News",
@@ -312,7 +313,7 @@ def fetch_cnbc():
             description = entry.summary if "summary" in entry else ""
             authors = []
             tags = [tag]
-            pub_date = entry.published
+            pub_date = parser.parse(entry.published)
             article = {
                 "title": title,
                 "link": link,
@@ -320,12 +321,12 @@ def fetch_cnbc():
                 "tags": tags,
                 "description": description,
                 "pub_date": pub_date,
+                "outlet": "cnbc",
             }
             collection.insert_one(article)
 
 
 def fetch_tech_crunch():
-    collection = db["tech_crunch"]
     url = "https://techcrunch.com/feed/"
     feed = feedparser.parse(url)
 
@@ -339,7 +340,7 @@ def fetch_tech_crunch():
         description = soup.find("p").text.strip()
         authors = [author["name"] for author in entry.authors]
         tags = [tag["term"] for tag in entry.tags]
-        pub_date = entry.published
+        pub_date = parser.parse(entry.published)
         article = {
             "title": title,
             "link": link,
@@ -347,12 +348,12 @@ def fetch_tech_crunch():
             "tags": tags,
             "description": description,
             "pub_date": pub_date,
+            "outlet": "tech_crunch",
         }
         collection.insert_one(article)
 
 
 def fetch_tech_crunch_connie():
-    collection = db["tech_crunch_connie"]
     url = "https://techcrunch.com/author/connie-loizos/feed/"
     feed = feedparser.parse(url)
 
@@ -366,7 +367,7 @@ def fetch_tech_crunch_connie():
         description = soup.find("p").text.strip()
         authors = [author["name"] for author in entry.authors]
         tags = [tag["term"] for tag in entry.tags]
-        pub_date = entry.published
+        pub_date = parser.parse(entry.published)
         article = {
             "title": title,
             "link": link,
@@ -374,12 +375,12 @@ def fetch_tech_crunch_connie():
             "tags": tags,
             "description": description,
             "pub_date": pub_date,
+            "outlet": "tech_crunch_connie",
         }
         collection.insert_one(article)
 
 
 def fetch_fortune():
-    collection = db["fortune"]
     url = "https://fortune.com/feed/fortune-feeds/?id=3230629"
     feed = feedparser.parse(url)
 
@@ -392,7 +393,7 @@ def fetch_fortune():
         description = entry.summary
         authors = [author["name"] for author in entry.authors]
         tags = [tag["term"] for tag in entry.tags]
-        pub_date = entry.published
+        pub_date = parser.parse(entry.published)
         article = {
             "title": title,
             "link": link,
@@ -400,12 +401,12 @@ def fetch_fortune():
             "tags": tags,
             "description": description,
             "pub_date": pub_date,
+            "outlet": "fortune",
         }
         collection.insert_one(article)
 
 
 def fetch_verge():
-    collection = db["verge"]
     url = [
         (
             "Android",
@@ -450,7 +451,7 @@ def fetch_verge():
             description = soup.find("p").text.strip()
             authors = [author["name"] for author in entry.authors]
             tags = [tag]
-            pub_date = entry.published
+            pub_date = parser.parse(entry.published)
             article = {
                 "title": title,
                 "link": link,
@@ -458,6 +459,7 @@ def fetch_verge():
                 "tags": tags,
                 "description": description,
                 "pub_date": pub_date,
+                "outlet": "verge",
             }
             collection.insert_one(article)
 
