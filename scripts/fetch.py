@@ -471,8 +471,12 @@ async def fetch_verge():
             collection.insert_one(article)
 
 
+def fetch_job():
+    asyncio.run(fetch())
+
+
 # Schedule the script to run every minute
-schedule.every(1).minutes.do(asyncio.run(fetch()))
+schedule.every(1).minutes.do(fetch_job)
 while True:
     schedule.run_pending()
     time.sleep(1)
