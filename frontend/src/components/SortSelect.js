@@ -2,7 +2,6 @@ import { Select } from "@chakra-ui/react";
 import { useState } from "react";
 
 const defaultOptions = [
-  { value: "filter", label: "Filter" },
   { value: "chronological_asc", label: "Chronological (Asc)" },
   { value: "chronological_desc", label: "Chronological (Desc)" },
   { value: "alphabetical_asc", label: "Alphabetical (Asc)" },

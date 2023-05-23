@@ -8,17 +8,65 @@ import {
   VStack,
 } from "@chakra-ui/react";
 import { useEffect, useState } from "react";
+import axios from "axios";
 import { useSearchParams } from "react-router-dom";
 import { FiExternalLink } from "react-icons/fi";
 import Layout from "../components/Layout";
 import SidePanel from "../components/SidePanel";
-import feed from "../rss.json";
 import SortSelect from "../components/SortSelect";
 
 const Dashboard = () => {
   const [searchParams, setSearchParams] = useSearchParams();
   const newsSource = searchParams.get("source") ?? "all";
   const [selectedSource, setSelectedSource] = useState(newsSource);
+  const [news, setNews] = useState([]);
+  const [page, setPage] = useState(1);
+  const [sortOption, setSortOption] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
+
+  const fetchNews = async () => {
+    if (isLoading) return; // Prevent multiple simultaneous requests
+    setIsLoading(true);
+    try {
+      const response = await axios.post("http://localhost:3000/get", {
+        newsSource,
+        page,
+        sortBy: sortOption,
+      });
+      const fetchedNews = response.data;
+      const newNews = [...news, ...fetchedNews.articles];
+      setNews(newNews);
+      setPage((prevPage) => prevPage + 1);
+    } catch (error) {
+      console.error("Error fetching news:", error);
+    }
+    setIsLoading(false);
+  };
+
+  const fetchNewNews = async () => {
+    if (isLoading) return; // Prevent multiple simultaneous requests
+    setIsLoading(true);
+    try {
+      const response = await axios.post("http://localhost:3000/get", {
+        newsSource,
+        page: 1,
+        sortBy: sortOption,
+      });
+      const fetchedNews = response.data;
+      setNews(fetchedNews.articles);
+      setPage(2);
+    } catch (error) {
+      console.error("Error fetching news:", error);
+    }
+    setIsLoading(false);
+  };
+
+  const handleScroll = (e) => {
+    const { scrollTop, clientHeight, scrollHeight } = e.target;
+    if (scrollTop + clientHeight >= scrollHeight - 5 && !isLoading) {
+      fetchNews();
+    }
+  };
 
   const setNewsSource = (source) => {
     if (source === selectedSource) {
@@ -29,8 +77,8 @@ const Dashboard = () => {
   };
 
   useEffect(() => {
-    setSelectedSource(newsSource);
-  }, [newsSource]);
+    fetchNewNews();
+  }, [newsSource, sortOption]);
 
   return (
     <Layout>
@@ -47,11 +95,18 @@ const Dashboard = () => {
           />
         </Box>
         <Divider orientation="vertical" />
-        <VStack spacing={4} p={2} w="full" h="full" overflowY="scroll">
-          <SortSelect />
-          {feed.map((item) => (
+        <VStack
+          spacing={4}
+          p={2}
+          w="full"
+          h="full"
+          overflowY="scroll"
+          onScroll={handleScroll}
+        >
+          <SortSelect onChange={(opt) => setSortOption(opt)} />
+          {news.map((item, index) => (
             <VStack
-              key={item.id}
+              key={index}
               borderRadius="md"
               shadow="md"
               p={4}
@@ -94,7 +149,12 @@ const Dashboard = () => {
                 {item.description}
               </Text>
               <Text fontSize="sm" pt={4}>
-                <strong>{item.author}</strong> • {item.pubDate}
+                {item.authors.length > 0 && (
+                  <>
+                    <strong>{item.authors.join(", ")}</strong> •{" "}
+                  </>
+                )}
+                {new Date(item.pub_date).toLocaleString()}
               </Text>
             </VStack>
           ))}

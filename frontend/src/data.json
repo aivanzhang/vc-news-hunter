@@ -18,11 +18,11 @@
     "url": "https://www.washingtonpost.com/"
   },
   {
-    "id": "info",
+    "id": "information",
     "title": "The Information",
     "description": "The Information is a subscription-based digital media company that focuses on original, in-depth reporting and analysis of the technology industry.",
     "children": {
-      "info-kate_clark": {
+      "information_kate": {
         "title": "Kate Clark",
         "url": "https://www.theinformation.com/authors/2143-kate-clark",
         "description": "Kate Clark is a San Francisco-based reporter covering venture capital and startups at The Information."
@@ -66,11 +66,11 @@
     "url": "https://www.fortune.com/newsletter/termsheet/"
   },
   {
-    "id": "techcrunch",
+    "id": "tech_crunch",
     "title": "TechCrunch",
     "description": "TechCrunch is an American online publisher of technology industry news founded in 2005. It reports on the business of tech, tech news, analysis of emerging trends in tech, and profiling of new tech businesses and products.",
     "children": {
-      "techcrunch-connie_loizos": {
+      "tech_crunch_connie": {
         "title": "Connie Loizos",
         "url": "https://techcrunch.com/author/connie-loizos/",
         "description": "Connie Loizos is a well-known journalist and editor who covers startups and venture capital for TechCrunch. She is widely respected for her ability to spot emerging trends in the startup ecosystem and her deep knowledge of the venture capital industry."
