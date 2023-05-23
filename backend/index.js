@@ -14,10 +14,13 @@ const newsSchema = new mongoose.Schema({
 
 // Connect to MongoDBm
 mongoose
-  .connect("mongodb://localhost:27017/vc_news", {
-    useNewUrlParser: true,
-    useUnifiedTopology: true,
-  })
+  .connect(
+    "mongodb+srv://ivan:9lhUkeVT3YYGVAzh@cluster0.67lpgjg.mongodb.net/?retryWrites=true&w=majority",
+    {
+      useNewUrlParser: true,
+      useUnifiedTopology: true,
+    }
+  )
   .then(() => {
     console.log("Connected to MongoDB");
   })
