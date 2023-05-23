@@ -48,11 +48,14 @@ const Dashboard = () => {
     if (isLoading) return; // Prevent multiple simultaneous requests
     setIsLoading(true);
     try {
-      const response = await axios.post("http://localhost:3000/get", {
-        newsSource,
-        page: 1,
-        sortBy: sortOption,
-      });
+      const response = await axios.post(
+        "https://ec2-3-81-162-197.compute-1.amazonaws.com/get",
+        {
+          newsSource,
+          page: 1,
+          sortBy: sortOption,
+        }
+      );
       const fetchedNews = response.data;
       setNews(fetchedNews.articles);
       setPage(2);
