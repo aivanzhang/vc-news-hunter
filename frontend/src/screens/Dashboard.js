@@ -87,6 +87,10 @@ const Dashboard = () => {
     fetchNewNews();
   }, [newsSource, sortOption]); // eslint-disable-line react-hooks/exhaustive-deps
 
+  useEffect(() => {
+    setSelectedSource(newsSource);
+  }, [newsSource]);
+
   return (
     <Layout>
       <HStack

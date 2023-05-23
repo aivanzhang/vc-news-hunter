@@ -3,7 +3,6 @@ import { Box, Heading } from "@chakra-ui/react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 
 function Layout({ children, backButton }) {
-  const [, setSearchParams] = useSearchParams();
   const navigate = useNavigate();
   return (
     <Box p="4">
@@ -13,10 +12,7 @@ function Layout({ children, backButton }) {
           as="h1"
           size="xl"
           color="primary.500"
-          onClick={() => {
-            navigate("/");
-            setSearchParams({ source: "all" });
-          }}
+          onClick={() => navigate("/")}
           cursor="pointer"
         >
           VC News
