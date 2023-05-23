@@ -82,7 +82,7 @@ const Dashboard = () => {
 
   useEffect(() => {
     fetchNewNews();
-  }, [newsSource, sortOption]);
+  }, [newsSource, sortOption]); // eslint-disable-line react-hooks/exhaustive-deps
 
   return (
     <Layout>
