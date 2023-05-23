@@ -30,7 +30,7 @@ const Dashboard = () => {
     setIsLoading(true);
     try {
       const response = await axios.post(
-        "http://ec2-3-81-162-197.compute-1.amazonaws.com:3000/get",
+        "https://fe3c-3-81-162-197.ngrok-free.app/get",
         {
           newsSource,
           page,
@@ -52,7 +52,7 @@ const Dashboard = () => {
     setIsLoading(true);
     try {
       const response = await axios.post(
-        "http://ec2-3-81-162-197.compute-1.amazonaws.com:3000/get",
+        "https://fe3c-3-81-162-197.ngrok-free.app/get",
         {
           newsSource,
           page: 1,
