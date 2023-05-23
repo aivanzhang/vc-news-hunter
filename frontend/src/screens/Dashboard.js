@@ -14,6 +14,7 @@ import { FiExternalLink } from "react-icons/fi";
 import Layout from "../components/Layout";
 import SidePanel from "../components/SidePanel";
 import SortSelect from "../components/SortSelect";
+import sources from "../sources.json";
 
 const Dashboard = () => {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -122,7 +123,7 @@ const Dashboard = () => {
                 <VStack spacing={1} w="full" alignItems="flex-start">
                   {selectedSource === "all" && (
                     <Text size="md" color="gray">
-                      {item.outlet}
+                      {sources[item.outlet]}
                     </Text>
                   )}
                   <Heading

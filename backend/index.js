@@ -40,7 +40,6 @@ app.use(function (req, res, next) {
 app.post("/get", (req, res) => {
   // Get data from the request body
   const { newsSource, page, sortBy = "" } = req.body;
-  console.log(newsSource, page, sortBy);
   const limit = 10;
   let [sortValue = "chronological", sortOrder = "desc"] =
     sortBy !== "" ? sortBy.split("_") : [];
@@ -55,26 +54,21 @@ app.post("/get", (req, res) => {
   } else {
     sortOrder = -1;
   }
-  console.log(sortValue, sortOrder);
 
-  if (newsSource === "all") {
-  } else {
-    const newsSourceCollection = mongoose.model("articles", newsSchema);
+  const newsSourceCollection = mongoose.model("articles", newsSchema);
 
-    newsSourceCollection
-      .find({ outlet: newsSource })
-      .sort({ [sortValue]: sortOrder })
-      .skip((page - 1) * limit)
-      .limit(limit)
-      .then((docs) => {
-        console.log(docs);
-        res.status(200).json({ articles: docs });
-      })
-      .catch((err) => {
-        console.error(err);
-        res.status(500).json({ message: "Error retrieving documents" });
-      });
-  }
+  newsSourceCollection
+    .find(newsSource === "all" ? {} : { outlet: newsSource })
+    .sort({ [sortValue]: sortOrder })
+    .skip((page - 1) * limit)
+    .limit(limit)
+    .then((docs) => {
+      res.status(200).json({ articles: docs });
+    })
+    .catch((err) => {
+      console.error(err);
+      res.status(500).json({ message: "Error retrieving documents" });
+    });
 });
 
 // Start the server

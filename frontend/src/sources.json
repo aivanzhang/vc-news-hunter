@@ -1,0 +1,19 @@
+{
+  "nyt": "The New York Times",
+  "wsj": "The Wall Street Journal",
+  "wp": "The Washington Post",
+  "information": "The Information",
+  "information_kate": "The Information - Kate Clark",
+  "axios": "Axios",
+  "axios-dan_primack": "Axios - Dan Primack",
+  "bloomberg": "Bloomberg",
+  "insider": "Insider",
+  "strictly_vc": "Strictly VC",
+  "termsheet": "Term Sheet",
+  "tech_crunch": "TechCrunch",
+  "tech_crunch_connie": "TechCrunch - Connie Loizos",
+  "fortune": "Fortune",
+  "verge": "The Verge",
+  "cnbc": "CNBC",
+  "semafor": "Semafor"
+}

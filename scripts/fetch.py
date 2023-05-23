@@ -1,35 +1,42 @@
 import feedparser
 from functools import reduce
 from pymongo import MongoClient
+from pymongo.server_api import ServerApi
 from bs4 import BeautifulSoup
 import pprint
 import schedule
 import time
 from dateutil import parser
+import asyncio
 
 # Set up MongoDB connection
 # Update with your MongoDB connection details
-client = MongoClient("mongodb://localhost:27017/")
+uri = "mongodb+srv://ivan:9lhUkeVT3YYGVAzh@cluster0.67lpgjg.mongodb.net/?retryWrites=true&w=majority"
+# Create a new client and connect to the server
+client = MongoClient(uri, server_api=ServerApi("1"))
 db = client["vc_news"]  # Name of the database
 collection = db["articles"]  # Name of the collection
 
 
-def fetch():
-    # fetch_nyt()
-    # fetch_wsj()
-    # fetch_forbes()
-    # fetch_wp()
-    # fetch_information()
-    # fetch_information_kate()
-    # fetch_cnbc()
-    # fetch_tech_crunch()
-    # fetch_tech_crunch_connie()
-    # fetch_fortune()
-    # fetch_verge()
+async def fetch():
+    tasks = [
+        fetch_nyt(),
+        fetch_wsj(),
+        fetch_forbes(),
+        fetch_wp(),
+        fetch_information(),
+        fetch_information_kate(),
+        fetch_cnbc(),
+        fetch_tech_crunch(),
+        fetch_tech_crunch_connie(),
+        fetch_fortune(),
+        fetch_verge(),
+    ]
+    await asyncio.gather(*tasks)
     return
 
 
-def fetch_nyt():
+async def fetch_nyt():
     url = "https://rss.nytimes.com/services/xml/rss/nyt/Technology.xml"
     feed = feedparser.parse(url)
 
@@ -55,7 +62,7 @@ def fetch_nyt():
         collection.insert_one(article)
 
 
-def fetch_wsj():
+async def fetch_wsj():
     url = [
         ("US Business", "https://feeds.a.dj.com/rss/WSJcomUSBusiness.xml"),
         ("Markets", "https://feeds.a.dj.com/rss/RSSMarketsMain.xml"),
@@ -87,7 +94,7 @@ def fetch_wsj():
             collection.insert_one(article)
 
 
-def fetch_forbes():
+async def fetch_forbes():
     url = "https://rss.app/feeds/gPewJbxDeu3FskgJ.xml"
     feed = feedparser.parse(url)
 
@@ -114,7 +121,7 @@ def fetch_forbes():
         collection.insert_one(article)
 
 
-def fetch_wp():
+async def fetch_wp():
     url = [
         (
             "Technology",
@@ -150,7 +157,7 @@ def fetch_wp():
             collection.insert_one(article)
 
 
-def fetch_information():
+async def fetch_information():
     url = "https://www.theinformation.com/feed"
     feed = feedparser.parse(url)
 
@@ -179,7 +186,7 @@ def fetch_information():
         collection.insert_one(article)
 
 
-def fetch_information_kate():
+async def fetch_information_kate():
     url = "https://rss.app/feeds/OcSi0UxY1CKCIEpa.xml"
     feed = feedparser.parse(url)
 
@@ -206,7 +213,7 @@ def fetch_information_kate():
         collection.insert_one(article)
 
 
-def fetch_cnbc():
+async def fetch_cnbc():
     url = [
         (
             "Top News",
@@ -326,7 +333,7 @@ def fetch_cnbc():
             collection.insert_one(article)
 
 
-def fetch_tech_crunch():
+async def fetch_tech_crunch():
     url = "https://techcrunch.com/feed/"
     feed = feedparser.parse(url)
 
@@ -353,7 +360,7 @@ def fetch_tech_crunch():
         collection.insert_one(article)
 
 
-def fetch_tech_crunch_connie():
+async def fetch_tech_crunch_connie():
     url = "https://techcrunch.com/author/connie-loizos/feed/"
     feed = feedparser.parse(url)
 
@@ -380,7 +387,7 @@ def fetch_tech_crunch_connie():
         collection.insert_one(article)
 
 
-def fetch_fortune():
+async def fetch_fortune():
     url = "https://fortune.com/feed/fortune-feeds/?id=3230629"
     feed = feedparser.parse(url)
 
@@ -406,7 +413,7 @@ def fetch_fortune():
         collection.insert_one(article)
 
 
-def fetch_verge():
+async def fetch_verge():
     url = [
         (
             "Android",
@@ -464,9 +471,8 @@ def fetch_verge():
             collection.insert_one(article)
 
 
-fetch()
 # Schedule the script to run every minute
-# schedule.every(1).minutes.do(fetch_and_store_data)
-# while True:
-#     schedule.run_pending()
-#     time.sleep(1)
+schedule.every(1).minutes.do(asyncio.run(fetch()))
+while True:
+    schedule.run_pending()
+    time.sleep(1)
