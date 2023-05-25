@@ -22,10 +22,10 @@ async def fetch():
     tasks = [
         fetch_nyt(),
         fetch_wsj(),
-        fetch_forbes(),
+        # fetch_forbes(),
         fetch_wp(),
         fetch_information(),
-        fetch_information_kate(),
+        # fetch_information_kate(),
         fetch_cnbc(),
         fetch_tech_crunch(),
         fetch_tech_crunch_connie(),
