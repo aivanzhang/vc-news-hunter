@@ -8,9 +8,11 @@ import schedule
 import time
 from dateutil import parser
 import asyncio
+import requests
 
 # Set up MongoDB connection
 # Update with your MongoDB connection details
+# uri = "mongodb://localhost:27017"
 uri = "mongodb+srv://ivan:9lhUkeVT3YYGVAzh@cluster0.67lpgjg.mongodb.net/?retryWrites=true&w=majority"
 # Create a new client and connect to the server
 client = MongoClient(uri, server_api=ServerApi("1"))
@@ -22,7 +24,8 @@ async def fetch():
     tasks = [
         fetch_nyt(),
         fetch_wsj(),
-        # fetch_forbes(),
+        fetch_forbes(),
+        fetch_axios(),
         fetch_wp(),
         fetch_information(),
         # fetch_information_kate(),
@@ -31,6 +34,8 @@ async def fetch():
         fetch_tech_crunch_connie(),
         fetch_fortune(),
         fetch_verge(),
+        fetch_bloomberg(),
+        fetch_insider(),
     ]
     await asyncio.gather(*tasks)
     return
@@ -95,18 +100,16 @@ async def fetch_wsj():
 
 
 async def fetch_forbes():
-    url = "https://rss.app/feeds/gPewJbxDeu3FskgJ.xml"
+    url = "https://news.google.com/rss/search?q=when:24h+allinurl:forbes.com&hl=en-US&gl=US&ceid=US:en"
     feed = feedparser.parse(url)
 
     for entry in feed.entries:
-        title = entry.title
+        title = entry.title.replace(" - Forbes", "")
         if collection.find_one({"title": title}):
             continue
-
         link = entry.link
-        soup = BeautifulSoup(entry.summary, "html.parser")
-        description = soup.find("div").find("div").text.strip()
-        authors = [author.strip() for author in entry.author.split(",")]
+        description = ""
+        authors = []
         tags = []
         pub_date = parser.parse(entry.published)
         article = {
@@ -117,6 +120,32 @@ async def fetch_forbes():
             "description": description,
             "pub_date": pub_date,
             "outlet": "forbes",
+        }
+        collection.insert_one(article)
+
+
+async def fetch_axios():
+    url = "https://api.axios.com/feed/"
+    feed = feedparser.parse(url)
+
+    for entry in feed.entries:
+        title = entry.title
+        if collection.find_one({"title": title}):
+            continue
+        link = entry.link
+        soup = BeautifulSoup(entry.summary, "html.parser")
+        description = soup.get_text().strip()
+        authors = [author["name"] for author in entry.authors]
+        tags = [tag["term"] for tag in entry.tags]
+        pub_date = parser.parse(entry.published)
+        article = {
+            "title": title,
+            "link": link,
+            "authors": authors,
+            "tags": tags,
+            "description": description,
+            "pub_date": pub_date,
+            "outlet": "axios",
         }
         collection.insert_one(article)
 
@@ -469,6 +498,89 @@ async def fetch_verge():
                 "outlet": "verge",
             }
             collection.insert_one(article)
+
+
+async def fetch_bloomberg():
+    url = "https://news.google.com/rss/search?q=when:24h+allinurl:bloomberg.com&hl=en-US&gl=US&ceid=US:en"
+    feed = feedparser.parse(url)
+
+    for entry in feed.entries:
+        title = entry.title.replace(" - Bloomberg", "")
+        if collection.find_one({"title": title}):
+            continue
+        link = entry.link
+        description = ""
+        authors = []
+        tags = []
+        pub_date = parser.parse(entry.published)
+        article = {
+            "title": title,
+            "link": link,
+            "authors": authors,
+            "tags": tags,
+            "description": description,
+            "pub_date": pub_date,
+            "outlet": "bloomberg",
+        }
+        collection.insert_one(article)
+
+
+async def fetch_insider():
+    url = "https://news.google.com/rss/search?q=when:24h+allinurl:businessinsider.com&hl=en-US&gl=US&ceid=US:en"
+    feed = feedparser.parse(url)
+
+    for entry in feed.entries:
+        title = entry.title.replace("- Business Insider", "")
+        if collection.find_one({"title": title}):
+            continue
+        link = entry.link
+        description = ""
+        authors = []
+        tags = []
+        pub_date = parser.parse(entry.published)
+        article = {
+            "title": title,
+            "link": link,
+            "authors": authors,
+            "tags": tags,
+            "description": description,
+            "pub_date": pub_date,
+            "outlet": "insider",
+        }
+        collection.insert_one(article)
+
+
+# def fetch_termsheet():
+#     url = "https://content.fortune.com/newsletter/termsheet/"
+#     soup = BeautifulSoup(requests.get(url).content, "html.parser")
+#     body = soup.find("td", {"class": "bodyContent"})
+#     date = body.find("strong").text
+#     if(not date):
+#         return
+#     title = date
+#     if collection.find_one({"title": title}):
+#         return
+#     link = url
+
+# for entry in feed.entries:
+#     title = entry.title.replace("- Business Insider", "")
+#     if collection.find_one({"title": title}):
+#         continue
+#     link = entry.link
+#     description = ""
+#     authors = []
+#     tags = []
+#     pub_date = parser.parse(entry.published)
+#     article = {
+#         "title": title,
+#         "link": link,
+#         "authors": authors,
+#         "tags": tags,
+#         "description": description,
+#         "pub_date": pub_date,
+#         "outlet": "termsheet",
+#     }
+#     collection.insert_one(article)
 
 
 def fetch_job():
