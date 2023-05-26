@@ -15,7 +15,7 @@ const newsSchema = new mongoose.Schema({
 // Connect to MongoDBm
 mongoose
   .connect(
-    "mongodb+srv://ivan:9lhUkeVT3YYGVAzh@cluster0.67lpgjg.mongodb.net/?retryWrites=true&w=majority",
+    "mongodb+srv://ivan:9lhUkeVT3YYGVAzh@cluster0.67lpgjg.mongodb.net/vc_news?retryWrites=true&w=majority",
     // "mongodb://localhost:27017/vc_news",
     {
       useNewUrlParser: true,
