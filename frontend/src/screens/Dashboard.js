@@ -15,6 +15,7 @@ import Layout from "../components/Layout";
 import SidePanel from "../components/SidePanel";
 import SortSelect from "../components/SortSelect";
 import sources from "../sources.json";
+import authors from "../authors.json";
 
 const Dashboard = () => {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -31,10 +32,14 @@ const Dashboard = () => {
     try {
       const response = await axios.post(
         "https://fe3c-3-81-162-197.ngrok-free.app/get",
+        // "http://localhost:3000/get",
         {
-          newsSource,
+          newsSource: authors[newsSource]
+            ? authors[newsSource].outlet
+            : newsSource,
           page,
           sortBy: sortOption,
+          author: authors[newsSource] ? authors[newsSource].author : null,
         }
       );
       const fetchedNews = response.data;
@@ -53,10 +58,14 @@ const Dashboard = () => {
     try {
       const response = await axios.post(
         "https://fe3c-3-81-162-197.ngrok-free.app/get",
+        // "http://localhost:3000/get",
         {
-          newsSource,
+          newsSource: authors[newsSource]
+            ? authors[newsSource].outlet
+            : newsSource,
           page: 1,
           sortBy: sortOption,
+          author: authors[newsSource] ? authors[newsSource].author : null,
         }
       );
       const fetchedNews = response.data;

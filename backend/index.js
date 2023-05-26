@@ -16,6 +16,7 @@ const newsSchema = new mongoose.Schema({
 mongoose
   .connect(
     "mongodb+srv://ivan:9lhUkeVT3YYGVAzh@cluster0.67lpgjg.mongodb.net/?retryWrites=true&w=majority",
+    // "mongodb://localhost:27017/vc_news",
     {
       useNewUrlParser: true,
       useUnifiedTopology: true,
@@ -42,10 +43,15 @@ app.use(function (req, res, next) {
 // Define a route to handle the database request
 app.post("/get", (req, res) => {
   // Get data from the request body
-  const { newsSource, page, sortBy = "" } = req.body;
+  const { newsSource, page, sortBy = "", author = null } = req.body;
   const limit = 10;
   let [sortValue = "chronological", sortOrder = "desc"] =
     sortBy !== "" ? sortBy.split("_") : [];
+  const findParams = newsSource === "all" ? {} : { outlet: newsSource };
+
+  if (author !== null) {
+    findParams.authors = author;
+  }
 
   if (sortValue === "alphabetical") {
     sortValue = "title";
@@ -61,7 +67,7 @@ app.post("/get", (req, res) => {
   const newsSourceCollection = mongoose.model("articles", newsSchema);
 
   newsSourceCollection
-    .find(newsSource === "all" ? {} : { outlet: newsSource })
+    .find(findParams)
     .sort({ [sortValue]: sortOrder })
     .skip((page - 1) * limit)
     .limit(limit)
