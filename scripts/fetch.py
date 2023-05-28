@@ -9,6 +9,7 @@ import time
 from dateutil import parser
 import asyncio
 import requests
+import re
 
 # Set up MongoDB connection
 # Update with your MongoDB connection details
@@ -28,7 +29,6 @@ async def fetch():
         fetch_axios(),
         fetch_wp(),
         fetch_information(),
-        # fetch_information_kate(),
         fetch_cnbc(),
         fetch_tech_crunch(),
         fetch_tech_crunch_connie(),
@@ -36,6 +36,7 @@ async def fetch():
         fetch_verge(),
         fetch_bloomberg(),
         fetch_insider(),
+        fetch_semafor(),
     ]
     await asyncio.gather(*tasks)
     return
@@ -211,33 +212,6 @@ async def fetch_information():
             "description": description,
             "pub_date": pub_date,
             "outlet": "information",
-        }
-        collection.insert_one(article)
-
-
-async def fetch_information_kate():
-    url = "https://rss.app/feeds/OcSi0UxY1CKCIEpa.xml"
-    feed = feedparser.parse(url)
-
-    for entry in feed.entries:
-        title = entry.title
-        if collection.find_one({"title": title}):
-            continue
-
-        link = entry.link
-        soup = BeautifulSoup(entry.summary, "html.parser")
-        description = soup.find("div").find("div").text.strip()
-        authors = [author["name"] for author in entry.authors]
-        tags = []
-        pub_date = parser.parse(entry.published)
-        article = {
-            "title": title,
-            "link": link,
-            "authors": authors,
-            "tags": tags,
-            "description": description,
-            "pub_date": pub_date,
-            "outlet": "information_kate",
         }
         collection.insert_one(article)
 
@@ -550,6 +524,41 @@ async def fetch_insider():
         collection.insert_one(article)
 
 
+async def fetch_semafor():
+    url = [
+        ("Technology", "https://www.semafor.com/vertical/tech"),
+        ("Business", "https://www.semafor.com/vertical/business"),
+    ]
+    for tag, url in url:
+        soup = BeautifulSoup(requests.get(url).content, "html.parser")
+        elements = soup.select('[class^="styles_gridItem"]')
+        for element in elements:
+            link = str(element.find("a")["href"])
+            if "newsletters" in link:
+                continue
+            date_pattern = r"/(\d{2}/\d{2}/\d{4})/"
+            matches = re.findall(date_pattern, link)
+            if not matches:
+                continue
+            title = element.select('[class^="styles_headline"]')[0].text
+            if collection.find_one({"title": title}):
+                continue
+            description = element.select('[class^="styles_intro"]')[0].text
+            pub_date = parser.parse(matches[0])
+            authors = []
+            tags = [tag]
+            article = {
+                "title": title,
+                "link": "https://www.semafor.com" + link,
+                "authors": authors,
+                "tags": tags,
+                "description": description,
+                "pub_date": pub_date,
+                "outlet": "termsheet",
+            }
+            collection.insert_one(article)
+
+
 # def fetch_termsheet():
 #     url = "https://content.fortune.com/newsletter/termsheet/"
 #     soup = BeautifulSoup(requests.get(url).content, "html.parser")
@@ -588,7 +597,9 @@ def fetch_job():
 
 
 # Schedule the script to run every minute
-schedule.every(1).minutes.do(fetch_job)
-while True:
-    schedule.run_pending()
-    time.sleep(1)
+# schedule.every(1).minutes.do(fetch_job)
+# while True:
+#     schedule.run_pending()
+#     time.sleep(1)
+
+# vcdealhunter@gmail.com
