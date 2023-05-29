@@ -10,11 +10,13 @@ from dateutil import parser
 import asyncio
 import requests
 import re
+import imaplib
+import email
 
 # Set up MongoDB connection
 # Update with your MongoDB connection details
-# uri = "mongodb://localhost:27017"
-uri = "mongodb+srv://ivan:9lhUkeVT3YYGVAzh@cluster0.67lpgjg.mongodb.net/?retryWrites=true&w=majority"
+uri = "mongodb://localhost:27017"
+# uri = "mongodb+srv://ivan:9lhUkeVT3YYGVAzh@cluster0.67lpgjg.mongodb.net/?retryWrites=true&w=majority"
 # Create a new client and connect to the server
 client = MongoClient(uri, server_api=ServerApi("1"))
 db = client["vc_news"]  # Name of the database
@@ -559,37 +561,67 @@ async def fetch_semafor():
             collection.insert_one(article)
 
 
-# def fetch_termsheet():
-#     url = "https://content.fortune.com/newsletter/termsheet/"
-#     soup = BeautifulSoup(requests.get(url).content, "html.parser")
-#     body = soup.find("td", {"class": "bodyContent"})
-#     date = body.find("strong").text
-#     if(not date):
-#         return
-#     title = date
-#     if collection.find_one({"title": title}):
-#         return
-#     link = url
+def fetch_strictly_vc():
+    # Get your Gmail credentials
+    USERNAME = "vcdealhunter@gmail.com"
+    PASSWORD = "ecoufdrjcemoesef"
 
-# for entry in feed.entries:
-#     title = entry.title.replace("- Business Insider", "")
-#     if collection.find_one({"title": title}):
-#         continue
-#     link = entry.link
-#     description = ""
-#     authors = []
-#     tags = []
-#     pub_date = parser.parse(entry.published)
-#     article = {
-#         "title": title,
-#         "link": link,
-#         "authors": authors,
-#         "tags": tags,
-#         "description": description,
-#         "pub_date": pub_date,
-#         "outlet": "termsheet",
-#     }
-#     collection.insert_one(article)
+    # Connect to the Gmail IMAP server
+    server = imaplib.IMAP4_SSL("imap.gmail.com")
+    server.login(USERNAME, PASSWORD)
+
+    # Select the Inbox folder
+    server.select("Inbox")
+
+    # Get a list of all the emails in the Inbox
+    result, messages = server.search(None, "ALL")
+
+    if result == "OK":
+        # Iterate over the messages
+        for message_id in messages[0].split():
+            # Get the email message
+            result, message = server.fetch(message_id, "(RFC822)")
+            if result == "OK":
+                email_message = email.message_from_bytes(message[0][1])
+                title = email_message["Subject"]
+                if collection.find_one({"title": title}):
+                    continue
+                date = email_message["Date"]
+                body = ""
+
+                # Iterate through email parts
+                for part in email_message.walk():
+                    if (part.get_content_type()) == "text/html":
+                        body += part.get_payload(decode=True).decode("utf-8")
+
+                soup = BeautifulSoup(body, "html.parser")
+                a_tag = soup.find("a", string="View in browser")
+                if not a_tag:
+                    continue
+                link = a_tag["href"]
+
+                server.copy(message_id, "Archive")
+                server.store(message_id, "+FLAGS", "\\Deleted")
+                description = ""
+                authors = []
+                tags = []
+                pub_date = parser.parse(date)
+                article = {
+                    "title": title,
+                    "link": link,
+                    "authors": authors,
+                    "tags": tags,
+                    "description": description,
+                    "pub_date": pub_date,
+                    "outlet": "strictly_vc",
+                }
+                collection.insert_one(article)
+
+        server.expunge()
+
+    # Close the connection to the Gmail IMAP server
+    server.close()
+    server.logout()
 
 
 def fetch_job():
@@ -597,9 +629,9 @@ def fetch_job():
 
 
 # Schedule the script to run every minute
-# schedule.every(1).minutes.do(fetch_job)
-# while True:
-#     schedule.run_pending()
-#     time.sleep(1)
+schedule.every(1).minutes.do(fetch_job)
+while True:
+    schedule.run_pending()
+    time.sleep(1)
 
-# vcdealhunter@gmail.com
+# fetch_strictly_vc()
