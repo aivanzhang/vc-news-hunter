@@ -15,8 +15,8 @@ import email
 
 # Set up MongoDB connection
 # Update with your MongoDB connection details
-uri = "mongodb://localhost:27017"
-# uri = "mongodb+srv://ivan:9lhUkeVT3YYGVAzh@cluster0.67lpgjg.mongodb.net/?retryWrites=true&w=majority"
+# uri = "mongodb://localhost:27017"
+uri = "mongodb+srv://ivan:9lhUkeVT3YYGVAzh@cluster0.67lpgjg.mongodb.net/?retryWrites=true&w=majority"
 # Create a new client and connect to the server
 client = MongoClient(uri, server_api=ServerApi("1"))
 db = client["vc_news"]  # Name of the database
@@ -39,6 +39,7 @@ async def fetch():
         fetch_bloomberg(),
         fetch_insider(),
         fetch_semafor(),
+        fetch_strictly_vc(),
     ]
     await asyncio.gather(*tasks)
     return
@@ -561,7 +562,7 @@ async def fetch_semafor():
             collection.insert_one(article)
 
 
-def fetch_strictly_vc():
+async def fetch_strictly_vc():
     # Get your Gmail credentials
     USERNAME = "vcdealhunter@gmail.com"
     PASSWORD = "ecoufdrjcemoesef"
@@ -633,5 +634,3 @@ schedule.every(1).minutes.do(fetch_job)
 while True:
     schedule.run_pending()
     time.sleep(1)
-
-# fetch_strictly_vc()
