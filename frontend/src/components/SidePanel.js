@@ -1,12 +1,45 @@
 import { Box, Button, Divider, Text, VStack } from "@chakra-ui/react";
-import { Fragment } from "react";
+import { Fragment, useEffect, useState } from "react";
 import classNames from "classnames";
 import sources from "../data.json";
+import axios from "axios";
 
 const SidePanel = ({ newsSource, setNewsSource }) => {
+  const [statuses, setStatuses] = useState([]);
+
   const handleButtonClick = (value) => {
     setNewsSource(value);
   };
+
+  useEffect(() => {
+    // Define the function to fetch the statuses
+    const fetchStatuses = async () => {
+      try {
+        const response = await axios.post(
+          "https://fe3c-3-81-162-197.ngrok-free.app/getStatuses",
+          // "http://localhost:3000/getStatuses",
+          {}
+        );
+        const data = response.data;
+        setStatuses(data.statuses);
+      } catch (error) {
+        console.error("Error fetching statuses:", error);
+      }
+    };
+
+    // Fetch statuses immediately when the component mounts
+    fetchStatuses();
+
+    // Set up the polling interval
+    const interval = setInterval(() => {
+      fetchStatuses();
+    }, 60000); // 1 minute interval
+
+    // Clean up the interval when the component unmounts
+    return () => {
+      clearInterval(interval);
+    };
+  }, []); // Empty dependency array to run the effect only once on mount
 
   return (
     <VStack spacing={2} w="full">
@@ -25,10 +58,16 @@ const SidePanel = ({ newsSource, setNewsSource }) => {
                   <span
                     className={classNames(
                       newsSource === source.id && "animate-ping",
-                      "absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"
+                      "absolute inline-flex h-full w-full rounded-full opacity-75",
+                      statuses[source.id] ? "bg-green-400" : "bg-red-400"
                     )}
                   ></span>
-                  <span className="relative inline-flex rounded-full h-full w-full bg-green-500"></span>
+                  <span
+                    className={classNames(
+                      "relative inline-flex rounded-full h-full w-full",
+                      statuses[source.id] ? "bg-green-500" : "bg-red-500"
+                    )}
+                  ></span>
                 </Box>
                 <Text overflow="hidden">{source.title}</Text>
               </Button>
@@ -46,10 +85,16 @@ const SidePanel = ({ newsSource, setNewsSource }) => {
                       <span
                         className={classNames(
                           newsSource === child && "animate-ping",
-                          "absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"
+                          "absolute inline-flex h-full w-full rounded-full opacity-75",
+                          statuses[source.id] ? "bg-green-400" : "bg-red-400"
                         )}
                       ></span>
-                      <span className="relative inline-flex rounded-full h-full w-full bg-green-500"></span>
+                      <span
+                        className={classNames(
+                          "relative inline-flex rounded-full h-full w-full",
+                          statuses[source.id] ? "bg-green-500" : "bg-red-500"
+                        )}
+                      ></span>
                     </Box>
                     <Text overflow="hidden">
                       {source.children[child].title}
@@ -73,10 +118,16 @@ const SidePanel = ({ newsSource, setNewsSource }) => {
                 <span
                   className={classNames(
                     newsSource === source.id && "animate-ping",
-                    "absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"
+                    "absolute inline-flex h-full w-full rounded-full opacity-75",
+                    statuses[source.id] ? "bg-green-400" : "bg-red-400"
                   )}
                 ></span>
-                <span className="relative inline-flex rounded-full h-full w-full bg-green-500"></span>
+                <span
+                  className={classNames(
+                    "relative inline-flex rounded-full h-full w-full",
+                    statuses[source.id] ? "bg-green-500" : "bg-red-500"
+                  )}
+                ></span>
               </Box>
               <Text overflow="hidden">{source.title}</Text>
             </Button>

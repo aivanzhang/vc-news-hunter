@@ -12,6 +12,11 @@ const newsSchema = new mongoose.Schema({
   outlet: String,
 });
 
+const onlineSchema = new mongoose.Schema({
+  outlet: String,
+  status: Boolean,
+});
+
 // Connect to MongoDBm
 mongoose
   .connect(
@@ -77,6 +82,25 @@ app.post("/get", (req, res) => {
     .catch((err) => {
       console.error(err);
       res.status(500).json({ message: "Error retrieving documents" });
+    });
+});
+
+app.post("/getStatuses", (req, res) => {
+  const onlineCollection = mongoose.model("onlines", onlineSchema);
+
+  onlineCollection
+    .find()
+    .then((docs) => {
+      // Convert docs so that they are indexed by outlet'
+      const docsObj = {};
+      docs.forEach((doc) => {
+        docsObj[doc.outlet] = doc.status;
+      });
+      res.status(200).json({ statuses: docsObj });
+    })
+    .catch((err) => {
+      console.error(err);
+      res.status(500).json({ message: "Error retrieving statuses" });
     });
 });
 

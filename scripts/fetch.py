@@ -21,7 +21,7 @@ uri = "mongodb+srv://ivan:9lhUkeVT3YYGVAzh@cluster0.67lpgjg.mongodb.net/?retryWr
 client = MongoClient(uri, server_api=ServerApi("1"))
 db = client["vc_news"]  # Name of the database
 collection = db["articles"]  # Name of the collection
-status_collection = db["online"]  # Name of the collection
+status_collection = db["onlines"]  # Name of the collection
 
 
 async def fetch():
