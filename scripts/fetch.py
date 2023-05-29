@@ -21,6 +21,7 @@ uri = "mongodb+srv://ivan:9lhUkeVT3YYGVAzh@cluster0.67lpgjg.mongodb.net/?retryWr
 client = MongoClient(uri, server_api=ServerApi("1"))
 db = client["vc_news"]  # Name of the database
 collection = db["articles"]  # Name of the collection
+status_collection = db["online"]  # Name of the collection
 
 
 async def fetch():
@@ -45,30 +46,47 @@ async def fetch():
     return
 
 
+def updateStatus(outlet, isOnline):
+    status_collection.update_one(
+        {"outlet": outlet},
+        {"$set": {"outlet": outlet, "status": isOnline}},
+        upsert=True,
+    )
+
+
 async def fetch_nyt():
     url = "https://rss.nytimes.com/services/xml/rss/nyt/Technology.xml"
-    feed = feedparser.parse(url)
+    updateStatus("nyt", True)
+    try:
+        feed = feedparser.parse(url)
+    except:
+        updateStatus("nyt", False)
+        return
 
     for entry in feed.entries:
-        title = entry.title
-        if collection.find_one({"title": title}):
-            continue
+        try:
+            title = entry.title
+            if collection.find_one({"title": title}):
+                continue
 
-        link = entry.link
-        description = entry.description
-        authors = [author.strip() for author in entry.author.split(",")]
-        tags = [tag.term for tag in entry.tags]
-        pub_date = parser.parse(entry.published)
-        article = {
-            "title": title,
-            "link": link,
-            "authors": authors,
-            "tags": tags,
-            "description": description,
-            "pub_date": pub_date,
-            "outlet": "nyt",
-        }
-        collection.insert_one(article)
+            link = entry.link
+            description = entry.description
+            authors = [author.strip() for author in entry.author.split(",")]
+            tags = [tag.term for tag in entry.tags]
+            pub_date = parser.parse(entry.published)
+            article = {
+                "title": title,
+                "link": link,
+                "authors": authors,
+                "tags": tags,
+                "description": description,
+                "pub_date": pub_date,
+                "outlet": "nyt",
+            }
+            collection.insert_one(article)
+        except:
+            updateStatus("nyt", False)
+            continue
 
 
 async def fetch_wsj():
@@ -78,18 +96,58 @@ async def fetch_wsj():
         ("Tech", "https://feeds.a.dj.com/rss/RSSWSJD.xml"),
     ]
 
+    updateStatus("wsj", True)
     for tag, url in url:
-        feed = feedparser.parse(url)
+        try:
+            feed = feedparser.parse(url)
+        except:
+            updateStatus("wsj", False)
+            continue
 
         for entry in feed.entries:
-            title = entry.title
-            if collection.find_one({"title": title}):
+            try:
+                title = entry.title
+                if collection.find_one({"title": title}):
+                    continue
+
+                link = entry.link
+                description = entry.summary
+                tags = [tag]
+                authors = []
+                pub_date = parser.parse(entry.published)
+                article = {
+                    "title": title,
+                    "link": link,
+                    "authors": authors,
+                    "tags": tags,
+                    "description": description,
+                    "pub_date": pub_date,
+                    "outlet": "wsj",
+                }
+                collection.insert_one(article)
+            except:
+                updateStatus("wsj", False)
                 continue
 
+
+async def fetch_forbes():
+    url = "https://news.google.com/rss/search?q=when:24h+allinurl:forbes.com&hl=en-US&gl=US&ceid=US:en"
+    updateStatus("forbes", True)
+    try:
+        feed = feedparser.parse(url)
+    except:
+        updateStatus("forbes", False)
+        return
+
+    for entry in feed.entries:
+        try:
+            title = entry.title.replace(" - Forbes", "")
+            if collection.find_one({"title": title}):
+                continue
             link = entry.link
-            description = entry.summary
-            tags = [tag]
+            description = ""
             authors = []
+            tags = []
             pub_date = parser.parse(entry.published)
             article = {
                 "title": title,
@@ -98,60 +156,47 @@ async def fetch_wsj():
                 "tags": tags,
                 "description": description,
                 "pub_date": pub_date,
-                "outlet": "wsj",
+                "outlet": "forbes",
             }
             collection.insert_one(article)
-
-
-async def fetch_forbes():
-    url = "https://news.google.com/rss/search?q=when:24h+allinurl:forbes.com&hl=en-US&gl=US&ceid=US:en"
-    feed = feedparser.parse(url)
-
-    for entry in feed.entries:
-        title = entry.title.replace(" - Forbes", "")
-        if collection.find_one({"title": title}):
+        except:
+            updateStatus("forbes", False)
             continue
-        link = entry.link
-        description = ""
-        authors = []
-        tags = []
-        pub_date = parser.parse(entry.published)
-        article = {
-            "title": title,
-            "link": link,
-            "authors": authors,
-            "tags": tags,
-            "description": description,
-            "pub_date": pub_date,
-            "outlet": "forbes",
-        }
-        collection.insert_one(article)
 
 
 async def fetch_axios():
     url = "https://api.axios.com/feed/"
-    feed = feedparser.parse(url)
+    updateStatus("axios", True)
+    try:
+        feed = feedparser.parse(url)
+    except:
+        updateStatus("axios", False)
+        return
 
     for entry in feed.entries:
-        title = entry.title
-        if collection.find_one({"title": title}):
+        try:
+            title = entry.title
+            if collection.find_one({"title": title}):
+                continue
+            link = entry.link
+            soup = BeautifulSoup(entry.summary, "html.parser")
+            description = soup.get_text().strip()
+            authors = [author["name"] for author in entry.authors]
+            tags = [tag["term"] for tag in entry.tags]
+            pub_date = parser.parse(entry.published)
+            article = {
+                "title": title,
+                "link": link,
+                "authors": authors,
+                "tags": tags,
+                "description": description,
+                "pub_date": pub_date,
+                "outlet": "axios",
+            }
+            collection.insert_one(article)
+        except:
+            updateStatus("axios", False)
             continue
-        link = entry.link
-        soup = BeautifulSoup(entry.summary, "html.parser")
-        description = soup.get_text().strip()
-        authors = [author["name"] for author in entry.authors]
-        tags = [tag["term"] for tag in entry.tags]
-        pub_date = parser.parse(entry.published)
-        article = {
-            "title": title,
-            "link": link,
-            "authors": authors,
-            "tags": tags,
-            "description": description,
-            "pub_date": pub_date,
-            "outlet": "axios",
-        }
-        collection.insert_one(article)
 
 
 async def fetch_wp():
@@ -165,18 +210,62 @@ async def fetch_wp():
             "https://feeds.washingtonpost.com/rss/business?itid=lk_inline_manual_37",
         ),
     ]
+    updateStatus("wp", True)
     for tag, url in url:
-        feed = feedparser.parse(url)
+        try:
+            feed = feedparser.parse(url)
+        except:
+            updateStatus("wp", False)
+            continue
 
         for entry in feed.entries:
+            try:
+                title = entry.title
+                if collection.find_one({"title": title}):
+                    continue
+
+                link = entry.link
+                description = entry.summary
+                authors = [author.strip() for author in entry.author.split(",")]
+                tags = [tag]
+                pub_date = parser.parse(entry.published)
+                article = {
+                    "title": title,
+                    "link": link,
+                    "authors": authors,
+                    "tags": tags,
+                    "description": description,
+                    "pub_date": pub_date,
+                    "outlet": "wp",
+                }
+                collection.insert_one(article)
+            except:
+                updateStatus("wp", False)
+                continue
+
+
+async def fetch_information():
+    url = "https://www.theinformation.com/feed"
+    updateStatus("information", True)
+    try:
+        feed = feedparser.parse(url)
+    except:
+        updateStatus("information", False)
+        return
+
+    for entry in feed.entries:
+        try:
             title = entry.title
             if collection.find_one({"title": title}):
                 continue
 
             link = entry.link
-            description = entry.summary
-            authors = [author.strip() for author in entry.author.split(",")]
-            tags = [tag]
+            soup = BeautifulSoup(entry.summary, "html.parser")
+            description = "".join(
+                [htag.text.strip() for htag in soup.find_all("p")]
+            ).strip()
+            authors = [author["name"] for author in entry.authors]
+            tags = []
             pub_date = parser.parse(entry.published)
             article = {
                 "title": title,
@@ -185,38 +274,12 @@ async def fetch_wp():
                 "tags": tags,
                 "description": description,
                 "pub_date": pub_date,
-                "outlet": "wp",
+                "outlet": "information",
             }
             collection.insert_one(article)
-
-
-async def fetch_information():
-    url = "https://www.theinformation.com/feed"
-    feed = feedparser.parse(url)
-
-    for entry in feed.entries:
-        title = entry.title
-        if collection.find_one({"title": title}):
+        except:
+            updateStatus("information", False)
             continue
-
-        link = entry.link
-        soup = BeautifulSoup(entry.summary, "html.parser")
-        description = "".join(
-            [htag.text.strip() for htag in soup.find_all("p")]
-        ).strip()
-        authors = [author["name"] for author in entry.authors]
-        tags = []
-        pub_date = parser.parse(entry.published)
-        article = {
-            "title": title,
-            "link": link,
-            "authors": authors,
-            "tags": tags,
-            "description": description,
-            "pub_date": pub_date,
-            "outlet": "information",
-        }
-        collection.insert_one(article)
 
 
 async def fetch_cnbc():
@@ -314,18 +377,60 @@ async def fetch_cnbc():
             "https://search.cnbc.com/rs/search/combinedcms/view.xml?partnerId=wrss01&id=38818154",
         ),
     ]
+    updateStatus("cnbc", True)
     for tag, url in url:
-        feed = feedparser.parse(url)
+        try:
+            feed = feedparser.parse(url)
+        except:
+            updateStatus("cnbc", False)
+            continue
 
         for entry in feed.entries:
+            try:
+                title = entry.title
+                if collection.find_one({"title": title}):
+                    continue
+
+                link = entry.link
+                description = entry.summary if "summary" in entry else ""
+                authors = []
+                tags = [tag]
+                pub_date = parser.parse(entry.published)
+                article = {
+                    "title": title,
+                    "link": link,
+                    "authors": authors,
+                    "tags": tags,
+                    "description": description,
+                    "pub_date": pub_date,
+                    "outlet": "cnbc",
+                }
+                collection.insert_one(article)
+            except:
+                updateStatus("cnbc", False)
+                continue
+
+
+async def fetch_tech_crunch():
+    url = "https://techcrunch.com/feed/"
+    updateStatus("tech_crunch", True)
+    try:
+        feed = feedparser.parse(url)
+    except:
+        updateStatus("tech_crunch", False)
+        return
+
+    for entry in feed.entries:
+        try:
             title = entry.title
             if collection.find_one({"title": title}):
                 continue
 
             link = entry.link
-            description = entry.summary if "summary" in entry else ""
-            authors = []
-            tags = [tag]
+            soup = BeautifulSoup(entry.summary, "html.parser")
+            description = soup.find("p").text.strip()
+            authors = [author["name"] for author in entry.authors]
+            tags = [tag["term"] for tag in entry.tags]
             pub_date = parser.parse(entry.published)
             article = {
                 "title": title,
@@ -334,89 +439,83 @@ async def fetch_cnbc():
                 "tags": tags,
                 "description": description,
                 "pub_date": pub_date,
-                "outlet": "cnbc",
+                "outlet": "tech_crunch",
             }
             collection.insert_one(article)
-
-
-async def fetch_tech_crunch():
-    url = "https://techcrunch.com/feed/"
-    feed = feedparser.parse(url)
-
-    for entry in feed.entries:
-        title = entry.title
-        if collection.find_one({"title": title}):
+        except:
+            updateStatus("tech_crunch", False)
             continue
-
-        link = entry.link
-        soup = BeautifulSoup(entry.summary, "html.parser")
-        description = soup.find("p").text.strip()
-        authors = [author["name"] for author in entry.authors]
-        tags = [tag["term"] for tag in entry.tags]
-        pub_date = parser.parse(entry.published)
-        article = {
-            "title": title,
-            "link": link,
-            "authors": authors,
-            "tags": tags,
-            "description": description,
-            "pub_date": pub_date,
-            "outlet": "tech_crunch",
-        }
-        collection.insert_one(article)
 
 
 async def fetch_tech_crunch_connie():
     url = "https://techcrunch.com/author/connie-loizos/feed/"
-    feed = feedparser.parse(url)
+    updateStatus("tech_crunch_connie", True)
+    try:
+        feed = feedparser.parse(url)
+    except:
+        updateStatus("tech_crunch_connie", False)
+        return
 
     for entry in feed.entries:
-        title = entry.title
-        if collection.find_one({"title": title}):
-            continue
+        try:
+            title = entry.title
+            if collection.find_one({"title": title}):
+                continue
 
-        link = entry.link
-        soup = BeautifulSoup(entry.summary, "html.parser")
-        description = soup.find("p").text.strip()
-        authors = [author["name"] for author in entry.authors]
-        tags = [tag["term"] for tag in entry.tags]
-        pub_date = parser.parse(entry.published)
-        article = {
-            "title": title,
-            "link": link,
-            "authors": authors,
-            "tags": tags,
-            "description": description,
-            "pub_date": pub_date,
-            "outlet": "tech_crunch_connie",
-        }
-        collection.insert_one(article)
+            link = entry.link
+            soup = BeautifulSoup(entry.summary, "html.parser")
+            description = soup.find("p").text.strip()
+            authors = [author["name"] for author in entry.authors]
+            tags = [tag["term"] for tag in entry.tags]
+            pub_date = parser.parse(entry.published)
+            article = {
+                "title": title,
+                "link": link,
+                "authors": authors,
+                "tags": tags,
+                "description": description,
+                "pub_date": pub_date,
+                "outlet": "tech_crunch_connie",
+            }
+            collection.insert_one(article)
+        except:
+            updateStatus("tech_crunch_connie", False)
+            continue
 
 
 async def fetch_fortune():
     url = "https://fortune.com/feed/fortune-feeds/?id=3230629"
-    feed = feedparser.parse(url)
+    updateStatus("fortune", True)
+    try:
+        feed = feedparser.parse(url)
+    except:
+        updateStatus("fortune", False)
+        return
 
     for entry in feed.entries:
-        title = entry.title
-        if collection.find_one({"title": title}):
-            continue
+        try:
+            title = entry.title
+            if collection.find_one({"title": title}):
+                continue
 
-        link = entry.link
-        description = entry.summary
-        authors = [author["name"] for author in entry.authors]
-        tags = [tag["term"] for tag in entry.tags]
-        pub_date = parser.parse(entry.published)
-        article = {
-            "title": title,
-            "link": link,
-            "authors": authors,
-            "tags": tags,
-            "description": description,
-            "pub_date": pub_date,
-            "outlet": "fortune",
-        }
-        collection.insert_one(article)
+            link = entry.link
+            description = entry.summary
+            authors = [author["name"] for author in entry.authors]
+            tags = [tag["term"] for tag in entry.tags]
+            pub_date = parser.parse(entry.published)
+            article = {
+                "title": title,
+                "link": link,
+                "authors": authors,
+                "tags": tags,
+                "description": description,
+                "pub_date": pub_date,
+                "outlet": "fortune",
+            }
+            collection.insert_one(article)
+        except:
+            updateStatus("fortune", False)
+            continue
 
 
 async def fetch_verge():
@@ -451,19 +550,59 @@ async def fetch_verge():
         ("Twitter", "https://www.theverge.com/rss/twitter/index.xml"),
         ("YouTube", "https://www.theverge.com/rss/youtube/index.xml"),
     ]
+    updateStatus("verge", True)
     for tag, url in url:
-        feed = feedparser.parse(url)
+        try:
+            feed = feedparser.parse(url)
+        except:
+            updateStatus("verge", False)
+            continue
 
         for entry in feed.entries:
-            title = entry.title
-            if collection.find_one({"title": title}):
+            try:
+                title = entry.title
+                if collection.find_one({"title": title}):
+                    continue
+
+                link = entry.link
+                soup = BeautifulSoup(entry.summary, "html.parser")
+                description = soup.find("p").text.strip()
+                authors = [author["name"] for author in entry.authors]
+                tags = [tag]
+                pub_date = parser.parse(entry.published)
+                article = {
+                    "title": title,
+                    "link": link,
+                    "authors": authors,
+                    "tags": tags,
+                    "description": description,
+                    "pub_date": pub_date,
+                    "outlet": "verge",
+                }
+                collection.insert_one(article)
+            except:
+                updateStatus("verge", False)
                 continue
 
+
+async def fetch_bloomberg():
+    url = "https://news.google.com/rss/search?q=when:24h+allinurl:bloomberg.com&hl=en-US&gl=US&ceid=US:en"
+    updateStatus("bloomberg", True)
+    try:
+        feed = feedparser.parse(url)
+    except:
+        updateStatus("bloomberg", False)
+        return
+
+    for entry in feed.entries:
+        try:
+            title = entry.title.replace(" - Bloomberg", "")
+            if collection.find_one({"title": title}):
+                continue
             link = entry.link
-            soup = BeautifulSoup(entry.summary, "html.parser")
-            description = soup.find("p").text.strip()
-            authors = [author["name"] for author in entry.authors]
-            tags = [tag]
+            description = ""
+            authors = []
+            tags = []
             pub_date = parser.parse(entry.published)
             article = {
                 "title": title,
@@ -472,59 +611,46 @@ async def fetch_verge():
                 "tags": tags,
                 "description": description,
                 "pub_date": pub_date,
-                "outlet": "verge",
+                "outlet": "bloomberg",
             }
             collection.insert_one(article)
-
-
-async def fetch_bloomberg():
-    url = "https://news.google.com/rss/search?q=when:24h+allinurl:bloomberg.com&hl=en-US&gl=US&ceid=US:en"
-    feed = feedparser.parse(url)
-
-    for entry in feed.entries:
-        title = entry.title.replace(" - Bloomberg", "")
-        if collection.find_one({"title": title}):
+        except:
+            updateStatus("bloomberg", False)
             continue
-        link = entry.link
-        description = ""
-        authors = []
-        tags = []
-        pub_date = parser.parse(entry.published)
-        article = {
-            "title": title,
-            "link": link,
-            "authors": authors,
-            "tags": tags,
-            "description": description,
-            "pub_date": pub_date,
-            "outlet": "bloomberg",
-        }
-        collection.insert_one(article)
 
 
 async def fetch_insider():
     url = "https://news.google.com/rss/search?q=when:24h+allinurl:businessinsider.com&hl=en-US&gl=US&ceid=US:en"
-    feed = feedparser.parse(url)
+    updateStatus("insider", True)
+    try:
+        feed = feedparser.parse(url)
+    except:
+        updateStatus("insider", False)
+        return
 
     for entry in feed.entries:
-        title = entry.title.replace("- Business Insider", "")
-        if collection.find_one({"title": title}):
+        try:
+            title = entry.title.replace("- Business Insider", "")
+            if collection.find_one({"title": title}):
+                continue
+            link = entry.link
+            description = ""
+            authors = []
+            tags = []
+            pub_date = parser.parse(entry.published)
+            article = {
+                "title": title,
+                "link": link,
+                "authors": authors,
+                "tags": tags,
+                "description": description,
+                "pub_date": pub_date,
+                "outlet": "insider",
+            }
+            collection.insert_one(article)
+        except:
+            updateStatus("insider", False)
             continue
-        link = entry.link
-        description = ""
-        authors = []
-        tags = []
-        pub_date = parser.parse(entry.published)
-        article = {
-            "title": title,
-            "link": link,
-            "authors": authors,
-            "tags": tags,
-            "description": description,
-            "pub_date": pub_date,
-            "outlet": "insider",
-        }
-        collection.insert_one(article)
 
 
 async def fetch_semafor():
@@ -532,34 +658,39 @@ async def fetch_semafor():
         ("Technology", "https://www.semafor.com/vertical/tech"),
         ("Business", "https://www.semafor.com/vertical/business"),
     ]
+    updateStatus("semafor", True)
     for tag, url in url:
-        soup = BeautifulSoup(requests.get(url).content, "html.parser")
-        elements = soup.select('[class^="styles_gridItem"]')
-        for element in elements:
-            link = str(element.find("a")["href"])
-            if "newsletters" in link:
-                continue
-            date_pattern = r"/(\d{2}/\d{2}/\d{4})/"
-            matches = re.findall(date_pattern, link)
-            if not matches:
-                continue
-            title = element.select('[class^="styles_headline"]')[0].text
-            if collection.find_one({"title": title}):
-                continue
-            description = element.select('[class^="styles_intro"]')[0].text
-            pub_date = parser.parse(matches[0])
-            authors = []
-            tags = [tag]
-            article = {
-                "title": title,
-                "link": "https://www.semafor.com" + link,
-                "authors": authors,
-                "tags": tags,
-                "description": description,
-                "pub_date": pub_date,
-                "outlet": "termsheet",
-            }
-            collection.insert_one(article)
+        try:
+            soup = BeautifulSoup(requests.get(url).content, "html.parser")
+            elements = soup.select('[class^="styles_gridItem"]')
+            for element in elements:
+                link = str(element.find("a")["href"])
+                if "newsletters" in link:
+                    continue
+                date_pattern = r"/(\d{2}/\d{2}/\d{4})/"
+                matches = re.findall(date_pattern, link)
+                if not matches:
+                    continue
+                title = element.select('[class^="styles_headline"]')[0].text
+                if collection.find_one({"title": title}):
+                    continue
+                description = element.select('[class^="styles_intro"]')[0].text
+                pub_date = parser.parse(matches[0])
+                authors = []
+                tags = [tag]
+                article = {
+                    "title": title,
+                    "link": "https://www.semafor.com" + link,
+                    "authors": authors,
+                    "tags": tags,
+                    "description": description,
+                    "pub_date": pub_date,
+                    "outlet": "termsheet",
+                }
+                collection.insert_one(article)
+        except:
+            updateStatus("semafor", False)
+            continue
 
 
 async def fetch_strictly_vc():
@@ -567,59 +698,64 @@ async def fetch_strictly_vc():
     USERNAME = "vcdealhunter@gmail.com"
     PASSWORD = "ecoufdrjcemoesef"
 
-    # Connect to the Gmail IMAP server
-    server = imaplib.IMAP4_SSL("imap.gmail.com")
-    server.login(USERNAME, PASSWORD)
+    updateStatus("strictly_vc", True)
 
-    # Select the Inbox folder
-    server.select("Inbox")
+    try:
+        # Connect to the Gmail IMAP server
+        server = imaplib.IMAP4_SSL("imap.gmail.com")
+        server.login(USERNAME, PASSWORD)
 
-    # Get a list of all the emails in the Inbox
-    result, messages = server.search(None, "ALL")
+        # Select the Inbox folder
+        server.select("Inbox")
 
-    if result == "OK":
-        # Iterate over the messages
-        for message_id in messages[0].split():
-            # Get the email message
-            result, message = server.fetch(message_id, "(RFC822)")
-            if result == "OK":
-                email_message = email.message_from_bytes(message[0][1])
-                title = email_message["Subject"]
-                if collection.find_one({"title": title}):
-                    continue
-                date = email_message["Date"]
-                body = ""
+        # Get a list of all the emails in the Inbox
+        result, messages = server.search(None, "ALL")
 
-                # Iterate through email parts
-                for part in email_message.walk():
-                    if (part.get_content_type()) == "text/html":
-                        body += part.get_payload(decode=True).decode("utf-8")
+        if result == "OK":
+            # Iterate over the messages
+            for message_id in messages[0].split():
+                # Get the email message
+                result, message = server.fetch(message_id, "(RFC822)")
+                if result == "OK":
+                    email_message = email.message_from_bytes(message[0][1])
+                    title = email_message["Subject"]
+                    if collection.find_one({"title": title}):
+                        continue
+                    date = email_message["Date"]
+                    body = ""
 
-                soup = BeautifulSoup(body, "html.parser")
-                a_tag = soup.find("a", string="View in browser")
-                if not a_tag:
-                    continue
-                link = a_tag["href"]
+                    # Iterate through email parts
+                    for part in email_message.walk():
+                        if (part.get_content_type()) == "text/html":
+                            body += part.get_payload(decode=True).decode("utf-8")
 
-                server.copy(message_id, "Archive")
-                server.store(message_id, "+FLAGS", "\\Deleted")
-                description = ""
-                authors = []
-                tags = []
-                pub_date = parser.parse(date)
-                article = {
-                    "title": title,
-                    "link": link,
-                    "authors": authors,
-                    "tags": tags,
-                    "description": description,
-                    "pub_date": pub_date,
-                    "outlet": "strictly_vc",
-                }
-                collection.insert_one(article)
+                    soup = BeautifulSoup(body, "html.parser")
+                    a_tag = soup.find("a", string="View in browser")
+                    if not a_tag:
+                        continue
+                    link = a_tag["href"]
 
-        server.expunge()
+                    server.copy(message_id, "Archive")
+                    server.store(message_id, "+FLAGS", "\\Deleted")
+                    description = ""
+                    authors = []
+                    tags = []
+                    pub_date = parser.parse(date)
+                    article = {
+                        "title": title,
+                        "link": link,
+                        "authors": authors,
+                        "tags": tags,
+                        "description": description,
+                        "pub_date": pub_date,
+                        "outlet": "strictly_vc",
+                    }
+                    collection.insert_one(article)
 
+            server.expunge()
+    except:
+        updateStatus("strictly_vc", False)
+        return
     # Close the connection to the Gmail IMAP server
     server.close()
     server.logout()
