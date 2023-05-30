@@ -685,7 +685,7 @@ async def fetch_semafor():
                     "tags": tags,
                     "description": description,
                     "pub_date": pub_date,
-                    "outlet": "termsheet",
+                    "outlet": "semafor",
                 }
                 collection.insert_one(article)
         except:
@@ -719,6 +719,9 @@ async def fetch_strictly_vc():
                 if result == "OK":
                     email_message = email.message_from_bytes(message[0][1])
                     title = email_message["Subject"]
+                    sender = email_message["From"]
+                    if sender != '"StrictlyVC" <connie@strictlyvc.com>':
+                        continue
                     if collection.find_one({"title": title}):
                         continue
                     date = email_message["Date"]
@@ -755,6 +758,77 @@ async def fetch_strictly_vc():
             server.expunge()
     except:
         updateStatus("strictly_vc", False)
+        return
+    # Close the connection to the Gmail IMAP server
+    server.close()
+    server.logout()
+
+
+async def fetch_term_sheet():
+    # Get your Gmail credentials
+    USERNAME = "vcdealhunter@gmail.com"
+    PASSWORD = "ecoufdrjcemoesef"
+
+    updateStatus("termsheet", True)
+
+    try:
+        # Connect to the Gmail IMAP server
+        server = imaplib.IMAP4_SSL("imap.gmail.com")
+        server.login(USERNAME, PASSWORD)
+
+        # Select the Inbox folder
+        server.select("Inbox")
+
+        # Get a list of all the emails in the Inbox
+        result, messages = server.search(None, "ALL")
+
+        if result == "OK":
+            # Iterate over the messages
+            for message_id in messages[0].split():
+                # Get the email message
+                result, message = server.fetch(message_id, "(RFC822)")
+                if result == "OK":
+                    email_message = email.message_from_bytes(message[0][1])
+                    title = email_message["Subject"]
+                    sender = email_message["From"]
+                    if sender != '"Term Sheet" <fortune@newsletter.fortune.com>':
+                        continue
+                    if collection.find_one({"title": title}):
+                        continue
+                    date = email_message["Date"]
+                    body = ""
+
+                    # Iterate through email parts
+                    for part in email_message.walk():
+                        if (part.get_content_type()) == "text/html":
+                            body += part.get_payload(decode=True).decode("utf-8")
+
+                    soup = BeautifulSoup(body, "html.parser")
+                    a_tag = soup.find("a", string="View this email in your browser.")
+                    if not a_tag:
+                        continue
+                    link = a_tag["href"]
+
+                    server.copy(message_id, "Archive")
+                    server.store(message_id, "+FLAGS", "\\Deleted")
+                    description = ""
+                    authors = []
+                    tags = []
+                    pub_date = parser.parse(date)
+                    article = {
+                        "title": title,
+                        "link": link,
+                        "authors": authors,
+                        "tags": tags,
+                        "description": description,
+                        "pub_date": pub_date,
+                        "outlet": "termsheet",
+                    }
+                    collection.insert_one(article)
+
+            server.expunge()
+    except:
+        updateStatus("termsheet", False)
         return
     # Close the connection to the Gmail IMAP server
     server.close()
