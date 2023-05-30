@@ -41,6 +41,7 @@ async def fetch():
         fetch_insider(),
         fetch_semafor(),
         fetch_strictly_vc(),
+        fetch_term_sheet(),
     ]
     await asyncio.gather(*tasks)
     return
