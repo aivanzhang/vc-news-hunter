@@ -721,7 +721,7 @@ async def fetch_strictly_vc():
                     email_message = email.message_from_bytes(message[0][1])
                     title = email_message["Subject"]
                     sender = email_message["From"]
-                    if sender != '"StrictlyVC" <connie@strictlyvc.com>':
+                    if sender != "StrictlyVC <connie@strictlyvc.com>":
                         continue
                     if collection.find_one({"title": title}):
                         continue
