@@ -10,10 +10,11 @@ import {
 import { useEffect, useState } from "react";
 import axios from "axios";
 import { useSearchParams } from "react-router-dom";
-import { FiExternalLink } from "react-icons/fi";
+import { IoIosCopy } from "react-icons/io";
 import Layout from "../components/Layout";
 import SidePanel from "../components/SidePanel";
-import SortSelect from "../components/SortSelect";
+import Filters from "../components/Filters";
+import { toast } from "react-toastify";
 import sources from "../sources.json";
 import authors from "../authors.json";
 
@@ -31,8 +32,8 @@ const Dashboard = () => {
     setIsLoading(true);
     try {
       const response = await axios.post(
-        "https://fe3c-3-81-162-197.ngrok-free.app/get",
-        // "http://localhost:3000/get",
+        // "https://fe3c-3-81-162-197.ngrok-free.app/get",
+        "http://localhost:3000/get",
         {
           newsSource: authors[newsSource]
             ? authors[newsSource].outlet
@@ -57,8 +58,8 @@ const Dashboard = () => {
     setIsLoading(true);
     try {
       const response = await axios.post(
-        "https://fe3c-3-81-162-197.ngrok-free.app/get",
-        // "http://localhost:3000/get",
+        // "https://fe3c-3-81-162-197.ngrok-free.app/get",
+        "http://localhost:3000/get",
         {
           newsSource: authors[newsSource]
             ? authors[newsSource].outlet
@@ -108,12 +109,20 @@ const Dashboard = () => {
         flexDir="inline-flex"
         className="h-[89vh] w-full"
       >
-        <Box py={2} className="w-1/4" h="full" overflowY="scroll">
+        <VStack
+          py={2}
+          className="w-1/4"
+          h="full"
+          overflowY="scroll"
+          spacing={2}
+        >
+          <Filters onSelectSort={(opt) => setSortOption(opt)} />
+          <Divider borderColor="black" />
           <SidePanel
             newsSource={selectedSource}
             setNewsSource={setNewsSource}
           />
-        </Box>
+        </VStack>
         <Divider orientation="vertical" />
         <VStack
           spacing={4}
@@ -123,7 +132,6 @@ const Dashboard = () => {
           overflowY="scroll"
           onScroll={handleScroll}
         >
-          <SortSelect onChange={(opt) => setSortOption(opt)} />
           {news.map((item, index) => (
             <VStack
               key={index}
@@ -133,6 +141,8 @@ const Dashboard = () => {
               spacing={1}
               w="full"
               alignItems="flex-start"
+              cursor="pointer"
+              onClick={() => window.open(item.link, "_blank")}
             >
               <HStack
                 justifyContent="space-between"
@@ -145,29 +155,28 @@ const Dashboard = () => {
                       {sources[item.outlet]}
                     </Text>
                   )}
-                  <Heading
-                    as="h3"
-                    size="md"
-                    className="clickable"
-                    onClick={() => navigator.clipboard.writeText(item.title)}
-                    cursor="pointer"
-                  >
+                  <Heading as="h3" size="md">
                     {item.title}
                   </Heading>
                 </VStack>
                 <IconButton
-                  icon={<FiExternalLink />}
+                  icon={<IoIosCopy />}
                   variant="ghost"
-                  onClick={() => window.open(item.link, "_blank")}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    navigator.clipboard.writeText(item.title);
+                    toast("Copied title to clipboard!", {
+                      position: "top-right",
+                      autoClose: 5000,
+                      hideProgressBar: false,
+                      closeOnClick: true,
+                      progress: undefined,
+                      theme: "light",
+                    });
+                  }}
                 />
               </HStack>
-              <Text
-                cursor="pointer"
-                className="clickable"
-                onClick={() => navigator.clipboard.writeText(item.description)}
-              >
-                {item.description}
-              </Text>
+              <Text>{item.description}</Text>
               <Text fontSize="sm" pt={4}>
                 {item.authors.length > 0 && (
                   <>
