@@ -1,5 +1,6 @@
 import {
-  Box,
+  Button,
+  ButtonGroup,
   Divider,
   HStack,
   Heading,
@@ -109,15 +110,16 @@ const Dashboard = () => {
         flexDir="inline-flex"
         className="h-[89vh] w-full"
       >
-        <VStack
-          py={2}
-          className="w-1/4"
-          h="full"
-          overflowY="scroll"
-          spacing={2}
-        >
+        <VStack className="w-1/4" h="full" overflowY="scroll" spacing={2}>
           <Filters onSelectSort={(opt) => setSortOption(opt)} />
-          <Divider borderColor="black" />
+          <ButtonGroup gap="2" justifyContent="flex-start" w="full">
+            <Button size="xs" variant="ghost" colorScheme="primary">
+              Select All
+            </Button>
+            <Button size="xs" variant="ghost" colorScheme="primary">
+              Clear All
+            </Button>
+          </ButtonGroup>
           <SidePanel
             newsSource={selectedSource}
             setNewsSource={setNewsSource}

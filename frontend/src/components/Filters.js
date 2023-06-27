@@ -1,4 +1,4 @@
-import { HStack, Input, Select, Text, VStack } from "@chakra-ui/react";
+import { Divider, HStack, Input, Select, Text, VStack } from "@chakra-ui/react";
 import { forwardRef, useState } from "react";
 import DatePicker from "react-datepicker";
 
@@ -65,6 +65,7 @@ const Filters = ({
           </option>
         ))}
       </Select>
+      <Divider borderColor="black" />
     </VStack>
   );
 };
