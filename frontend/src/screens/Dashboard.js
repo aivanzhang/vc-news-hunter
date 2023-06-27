@@ -61,7 +61,6 @@ const Dashboard = () => {
         }
       );
       const fetchedNews = response.data;
-      console.log(response);
       setNews(fetchedNews.articles);
       setPage(2);
     } catch (error) {
