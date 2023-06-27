@@ -4,11 +4,19 @@ import classNames from "classnames";
 import sources from "../data.json";
 import axios from "axios";
 
-const SidePanel = ({ newsSource, setNewsSource }) => {
+const SidePanel = ({ newsSources, setNewsSources }) => {
   const [statuses, setStatuses] = useState([]);
 
   const handleButtonClick = (value) => {
-    setNewsSource(value);
+    setNewsSources((prevSet) => {
+      const newSet = new Set(prevSet);
+      if (newSet.has(value)) {
+        newSet.delete(value);
+      } else {
+        newSet.add(value);
+      }
+      return newSet;
+    });
   };
 
   useEffect(() => {
@@ -16,8 +24,8 @@ const SidePanel = ({ newsSource, setNewsSource }) => {
     const fetchStatuses = async () => {
       try {
         const response = await axios.post(
-          // "https://fe3c-3-81-162-197.ngrok-free.app/getStatuses",
-          "http://localhost:3000/getStatuses",
+          "https://fe3c-3-81-162-197.ngrok-free.app/getStatuses",
+          // "http://localhost:3000/getStatuses",
           {}
         );
         const data = response.data;
@@ -48,8 +56,8 @@ const SidePanel = ({ newsSource, setNewsSource }) => {
           <Fragment key={source.id}>
             <VStack spacing={2} w="full">
               <Button
-                variant={newsSource === source.id ? "solid" : "ghost"}
-                colorScheme={newsSource === source.id ? "primary" : "gray"}
+                variant={newsSources.has(source.id) ? "solid" : "ghost"}
+                colorScheme={newsSources.has(source.id) ? "primary" : "gray"}
                 onClick={() => handleButtonClick(source.id)}
                 justifyContent="flex-start"
                 className="w-full"
@@ -57,7 +65,7 @@ const SidePanel = ({ newsSource, setNewsSource }) => {
                 <Box mr={2} className="relative flex h-3 w-3">
                   <span
                     className={classNames(
-                      newsSource === source.id && "animate-ping",
+                      newsSources.has(source.id) && "animate-ping",
                       "absolute inline-flex h-full w-full rounded-full opacity-75",
                       statuses[source.id] ? "bg-green-400" : "bg-red-400"
                     )}
@@ -75,8 +83,8 @@ const SidePanel = ({ newsSource, setNewsSource }) => {
                 {Object.keys(source.children).map((child) => (
                   <Button
                     key={child}
-                    variant={newsSource === child ? "solid" : "ghost"}
-                    colorScheme={newsSource === child ? "primary" : "gray"}
+                    variant={newsSources.has(child) ? "solid" : "ghost"}
+                    colorScheme={newsSources.has(child) ? "primary" : "gray"}
                     onClick={() => handleButtonClick(child)}
                     justifyContent="flex-start"
                     className="w-full"
@@ -84,7 +92,7 @@ const SidePanel = ({ newsSource, setNewsSource }) => {
                     <Box mr={2} className="relative flex h-3 w-3">
                       <span
                         className={classNames(
-                          newsSource === child && "animate-ping",
+                          newsSources.has(child) && "animate-ping",
                           "absolute inline-flex h-full w-full rounded-full opacity-75",
                           statuses[source.id] ? "bg-green-400" : "bg-red-400"
                         )}
@@ -108,8 +116,8 @@ const SidePanel = ({ newsSource, setNewsSource }) => {
         ) : (
           <Fragment key={source.id}>
             <Button
-              variant={newsSource === source.id ? "solid" : "ghost"}
-              colorScheme={newsSource === source.id ? "primary" : "gray"}
+              variant={newsSources.has(source.id) ? "solid" : "ghost"}
+              colorScheme={newsSources.has(source.id) ? "primary" : "gray"}
               onClick={() => handleButtonClick(source.id)}
               justifyContent="flex-start"
               className="w-full"
@@ -117,7 +125,7 @@ const SidePanel = ({ newsSource, setNewsSource }) => {
               <Box mr={2} className="relative flex h-3 w-3">
                 <span
                   className={classNames(
-                    newsSource === source.id && "animate-ping",
+                    newsSources.has(source.id) && "animate-ping",
                     "absolute inline-flex h-full w-full rounded-full opacity-75",
                     statuses[source.id] ? "bg-green-400" : "bg-red-400"
                   )}

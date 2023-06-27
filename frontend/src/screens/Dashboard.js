@@ -10,19 +10,17 @@ import {
 } from "@chakra-ui/react";
 import { useEffect, useState } from "react";
 import axios from "axios";
-import { useSearchParams } from "react-router-dom";
 import { IoIosCopy } from "react-icons/io";
 import Layout from "../components/Layout";
 import SidePanel from "../components/SidePanel";
 import Filters from "../components/Filters";
 import { toast } from "react-toastify";
 import sources from "../sources.json";
-import authors from "../authors.json";
 
 const Dashboard = () => {
-  const [searchParams, setSearchParams] = useSearchParams();
-  const newsSource = searchParams.get("source") ?? "all";
-  const [selectedSource, setSelectedSource] = useState(newsSource);
+  const [selectedSources, setSelectedSources] = useState(
+    new Set(Object.keys(sources))
+  );
   const [news, setNews] = useState([]);
   const [page, setPage] = useState(1);
   const [sortOption, setSortOption] = useState("");
@@ -33,15 +31,11 @@ const Dashboard = () => {
     setIsLoading(true);
     try {
       const response = await axios.post(
-        // "https://fe3c-3-81-162-197.ngrok-free.app/get",
-        "http://localhost:3000/get",
+        "https://fe3c-3-81-162-197.ngrok-free.app/get",
+        // "http://localhost:3000/get",
         {
-          newsSource: authors[newsSource]
-            ? authors[newsSource].outlet
-            : newsSource,
+          selectedSources: Array.from(selectedSources),
           page,
-          sortBy: sortOption,
-          author: authors[newsSource] ? authors[newsSource].author : null,
         }
       );
       const fetchedNews = response.data;
@@ -59,18 +53,15 @@ const Dashboard = () => {
     setIsLoading(true);
     try {
       const response = await axios.post(
-        // "https://fe3c-3-81-162-197.ngrok-free.app/get",
-        "http://localhost:3000/get",
+        "https://fe3c-3-81-162-197.ngrok-free.app/get",
+        // "http://localhost:3000/get",
         {
-          newsSource: authors[newsSource]
-            ? authors[newsSource].outlet
-            : newsSource,
+          selectedSources: Array.from(selectedSources),
           page: 1,
-          sortBy: sortOption,
-          author: authors[newsSource] ? authors[newsSource].author : null,
         }
       );
       const fetchedNews = response.data;
+      console.log(response);
       setNews(fetchedNews.articles);
       setPage(2);
     } catch (error) {
@@ -86,21 +77,9 @@ const Dashboard = () => {
     }
   };
 
-  const setNewsSource = (source) => {
-    if (source === selectedSource) {
-      source = "all";
-    }
-    setSearchParams({ source });
-    setSelectedSource(source);
-  };
-
   useEffect(() => {
     fetchNewNews();
-  }, [newsSource, sortOption]); // eslint-disable-line react-hooks/exhaustive-deps
-
-  useEffect(() => {
-    setSelectedSource(newsSource);
-  }, [newsSource]);
+  }, [selectedSources, sortOption]); // eslint-disable-line react-hooks/exhaustive-deps
 
   return (
     <Layout>
@@ -113,16 +92,26 @@ const Dashboard = () => {
         <VStack className="w-1/4" h="full" overflowY="scroll" spacing={2}>
           <Filters onSelectSort={(opt) => setSortOption(opt)} />
           <ButtonGroup gap="2" justifyContent="flex-start" w="full">
-            <Button size="xs" variant="ghost" colorScheme="primary">
+            <Button
+              size="xs"
+              variant="ghost"
+              colorScheme="primary"
+              onClick={() => setSelectedSources(new Set(Object.keys(sources)))}
+            >
               Select All
             </Button>
-            <Button size="xs" variant="ghost" colorScheme="primary">
+            <Button
+              size="xs"
+              variant="ghost"
+              colorScheme="primary"
+              onClick={() => setSelectedSources(new Set())}
+            >
               Clear All
             </Button>
           </ButtonGroup>
           <SidePanel
-            newsSource={selectedSource}
-            setNewsSource={setNewsSource}
+            newsSources={selectedSources}
+            setNewsSources={setSelectedSources}
           />
         </VStack>
         <Divider orientation="vertical" />
@@ -152,11 +141,9 @@ const Dashboard = () => {
                 w="full"
               >
                 <VStack spacing={1} w="full" alignItems="flex-start">
-                  {selectedSource === "all" && (
-                    <Text size="md" color="gray">
-                      {sources[item.outlet]}
-                    </Text>
-                  )}
+                  <Text size="md" color="gray">
+                    {sources[item.outlet]}
+                  </Text>
                   <Heading as="h3" size="md">
                     {item.title}
                   </Heading>
