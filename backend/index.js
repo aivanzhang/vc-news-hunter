@@ -1,5 +1,6 @@
 const express = require("express");
 const mongoose = require("mongoose");
+const authors = require("./authors.json");
 
 // Create a schema for your data
 const newsSchema = new mongoose.Schema({
@@ -45,35 +46,34 @@ app.use(function (req, res, next) {
   next();
 });
 
+function convertSources(selectedSources) {
+  const sources = [];
+
+  selectedSources.forEach((source) => {
+    if (authors[source]) {
+      sources.push({
+        outlet: authors[source].outlet,
+        authors: authors[source].author,
+      });
+    }
+    sources.push({
+      outlet: source,
+    });
+  });
+  return sources;
+}
+
 // Define a route to handle the database request
 app.post("/get", (req, res) => {
   // Get data from the request body
-  const { newsSource, page, sortBy = "", author = null } = req.body;
+  const { selectedSources, page } = req.body;
   const limit = 10;
-  let [sortValue = "chronological", sortOrder = "desc"] =
-    sortBy !== "" ? sortBy.split("_") : [];
-  const findParams = newsSource === "all" ? {} : { outlet: newsSource };
-
-  if (author !== null) {
-    findParams.authors = author;
-  }
-
-  if (sortValue === "alphabetical") {
-    sortValue = "title";
-  } else {
-    sortValue = "pub_date";
-  }
-  if (sortOrder === "asc") {
-    sortOrder = 1;
-  } else {
-    sortOrder = -1;
-  }
 
   const newsSourceCollection = mongoose.model("articles", newsSchema);
 
   newsSourceCollection
-    .find(findParams)
-    .sort({ [sortValue]: sortOrder })
+    .find()
+    .or(convertSources(selectedSources))
     .skip((page - 1) * limit)
     .limit(limit)
     .then((docs) => {
