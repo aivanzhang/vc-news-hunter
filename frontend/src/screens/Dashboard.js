@@ -25,6 +25,7 @@ const Dashboard = () => {
   const [page, setPage] = useState(1);
   const [sortOption, setSortOption] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const [dateRange, setDateRange] = useState([null, null]);
 
   const fetchNews = async () => {
     if (isLoading) return; // Prevent multiple simultaneous requests
@@ -36,6 +37,7 @@ const Dashboard = () => {
         {
           selectedSources: Array.from(selectedSources),
           page,
+          dateRange,
         }
       );
       const fetchedNews = response.data;
@@ -58,6 +60,7 @@ const Dashboard = () => {
         {
           selectedSources: Array.from(selectedSources),
           page: 1,
+          dateRange,
         }
       );
       const fetchedNews = response.data;
@@ -78,7 +81,7 @@ const Dashboard = () => {
 
   useEffect(() => {
     fetchNewNews();
-  }, [selectedSources, sortOption]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [selectedSources, sortOption, dateRange]); // eslint-disable-line react-hooks/exhaustive-deps
 
   return (
     <Layout>
@@ -89,7 +92,11 @@ const Dashboard = () => {
         className="h-[89vh] w-full"
       >
         <VStack className="w-1/4" h="full" overflowY="scroll" spacing={2}>
-          <Filters onSelectSort={(opt) => setSortOption(opt)} />
+          <Filters
+            onSelectSort={(opt) => setSortOption(opt)}
+            dateRange={dateRange}
+            setDateRange={setDateRange}
+          />
           <ButtonGroup gap="2" justifyContent="flex-start" w="full">
             <Button
               size="xs"

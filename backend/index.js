@@ -66,13 +66,21 @@ function convertSources(selectedSources) {
 // Define a route to handle the database request
 app.post("/get", (req, res) => {
   // Get data from the request body
-  const { selectedSources, page } = req.body;
+  const { selectedSources, page, dateRange } = req.body;
   const limit = 10;
-
   const newsSourceCollection = mongoose.model("articles", newsSchema);
-
+  let dateRangeQuery = {};
+  if (dateRange[0]) {
+    dateRangeQuery.$gte = new Date(dateRange[0]);
+  }
+  if (dateRange[1]) {
+    dateRangeQuery.$lte = new Date(dateRange[1]);
+  }
+  if (Object.keys(dateRangeQuery).length > 0) {
+    dateRangeQuery = { pub_date: { ...dateRangeQuery } };
+  }
   newsSourceCollection
-    .find()
+    .find(dateRangeQuery)
     .or(convertSources(selectedSources))
     .skip((page - 1) * limit)
     .limit(limit)

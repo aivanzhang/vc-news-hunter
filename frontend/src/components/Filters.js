@@ -22,10 +22,10 @@ const DatePickerInput = forwardRef(
 const Filters = ({
   sortOptions = defaultSortOptions,
   onSelectSort = () => {},
+  dateRange,
+  setDateRange,
 }) => {
   const [selectedOption, setSelectedOption] = useState("");
-  const [startDate, setStartDate] = useState(new Date());
-  const [endDate, setEndDate] = useState(new Date());
 
   const handleSelectSort = (event) => {
     const option = event.target.value;
@@ -46,14 +46,14 @@ const Filters = ({
       <Text fontWeight="bold">Date Range</Text>
       <HStack spacing={2} w="full" alignItems="center">
         <DatePicker
-          selected={startDate}
-          onChange={(date) => setStartDate(date)}
+          selected={dateRange[0]}
+          onChange={(date) => setDateRange((prevRange) => [date, prevRange[1]])}
           customInput={<DatePickerInput />}
         />
         <Text>-</Text>
         <DatePicker
-          selected={endDate}
-          onChange={(date) => setEndDate(date)}
+          selected={dateRange[1]}
+          onChange={(date) => setDateRange((prevRange) => [prevRange[0], date])}
           customInput={<DatePickerInput />}
         />
       </HStack>
