@@ -38,6 +38,7 @@ const Dashboard = () => {
           selectedSources: Array.from(selectedSources),
           page,
           dateRange,
+          sortOption,
         }
       );
       const fetchedNews = response.data;
@@ -61,6 +62,7 @@ const Dashboard = () => {
           selectedSources: Array.from(selectedSources),
           page: 1,
           dateRange,
+          sortOption,
         }
       );
       const fetchedNews = response.data;

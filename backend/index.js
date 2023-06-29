@@ -66,7 +66,7 @@ function convertSources(selectedSources) {
 // Define a route to handle the database request
 app.post("/get", (req, res) => {
   // Get data from the request body
-  const { selectedSources, page, dateRange } = req.body;
+  const { selectedSources, page, dateRange, sortOption } = req.body;
   const limit = 10;
   const newsSourceCollection = mongoose.model("articles", newsSchema);
   let dateRangeQuery = {};
@@ -82,6 +82,7 @@ app.post("/get", (req, res) => {
   newsSourceCollection
     .find(dateRangeQuery)
     .or(convertSources(selectedSources))
+    .sort(sortOption === "most_recent" ? { pub_date: -1 } : {})
     .skip((page - 1) * limit)
     .limit(limit)
     .then((docs) => {
