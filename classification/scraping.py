@@ -20,6 +20,7 @@ def scrap_vc_news_daily():
         for day_tag in day_urls_tags:
             if "Archive" in day_tag.text:
                 date = day_tag.text.replace("Archive for ", "")
+                print(f"Scraping news for {date}")
                 day_url = day_tag.get("href")
                 url = f"https://vcnewsdaily.com/access/{day_url}"
                 response = requests.get(url)
@@ -30,9 +31,9 @@ def scrap_vc_news_daily():
                     article_p = article_tag.find("div", class_="article-paragraph").text
                     article_headline = article_tag.find("a", class_="titleLink").text
                     txt += f"{date},{article_headline},{article_p},{article_url}\n"
-                time.sleep(10)
-    with open("vcnewsdaily.csv", "w+") as f:
-        f.write(txt)
+                time.sleep(5)
+            with open("vcnewsdaily.csv", "w+") as f:
+                f.write(txt)
 
 
 scrap_vc_news_daily()
