@@ -1,6 +1,7 @@
 import requests
 import time
 from bs4 import BeautifulSoup
+import csv
 
 
 def scrap_vc_news_daily():
@@ -30,10 +31,28 @@ def scrap_vc_news_daily():
                     article_url = article_tag.find("a", class_="titleLink").get("href")
                     article_p = article_tag.find("div", class_="article-paragraph").text
                     article_headline = article_tag.find("a", class_="titleLink").text
-                    txt += f"{date},{article_headline},{article_p},{article_url}\n"
-                time.sleep(5)
-            with open("vcnewsdaily.csv", "w+") as f:
-                f.write(txt)
+                    news_writer = csv.writer(open("vcnewsdaily.csv", "a"))
+                    news_writer.writerow(
+                        [date, article_headline, article_p, article_url]
+                    )
 
 
-scrap_vc_news_daily()
+# scrap_vc_news_daily()
+
+
+def clean_scrapped_data():
+    with open("vcnewsdaily.csv", "r") as file:
+        reader = csv.reader(file)
+        rows = list(reader)
+
+    # Extract headlines from each row
+    headlines = [row[1] for row in rows]
+
+    # Write headlines to output CSV file
+    with open("vcnewsdaily_clean.csv", "w+", newline="") as file:
+        writer = csv.writer(file)
+        for headline in headlines:
+            writer.writerow([headline, 4])
+
+
+clean_scrapped_data()
