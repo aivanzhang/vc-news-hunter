@@ -65,7 +65,6 @@ const SidePanel = ({ newsSources, setNewsSources }) => {
                 <Box mr={2} className="relative flex h-3 w-3">
                   <span
                     className={classNames(
-                      newsSources.has(source.id) && "animate-ping",
                       "absolute inline-flex h-full w-full rounded-full opacity-75",
                       statuses[source.id] ? "bg-green-400" : "bg-red-400"
                     )}
@@ -92,7 +91,6 @@ const SidePanel = ({ newsSources, setNewsSources }) => {
                     <Box mr={2} className="relative flex h-3 w-3">
                       <span
                         className={classNames(
-                          newsSources.has(child) && "animate-ping",
                           "absolute inline-flex h-full w-full rounded-full opacity-75",
                           statuses[source.id] ? "bg-green-400" : "bg-red-400"
                         )}
@@ -125,7 +123,6 @@ const SidePanel = ({ newsSources, setNewsSources }) => {
               <Box mr={2} className="relative flex h-3 w-3">
                 <span
                   className={classNames(
-                    newsSources.has(source.id) && "animate-ping",
                     "absolute inline-flex h-full w-full rounded-full opacity-75",
                     statuses[source.id] ? "bg-green-400" : "bg-red-400"
                   )}
