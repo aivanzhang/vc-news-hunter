@@ -417,7 +417,8 @@ async def fetch_tech_crunch():
     updateStatus("tech_crunch", True)
     try:
         feed = feedparser.parse(url)
-    except:
+    except Exception as e:
+        print(e)
         updateStatus("tech_crunch", False)
         return
 
@@ -429,7 +430,12 @@ async def fetch_tech_crunch():
 
             link = entry.link
             soup = BeautifulSoup(entry.summary, "html.parser")
-            description = soup.find("p").text.strip()
+            description = soup.text
+            try:
+                description = soup.find("p").text.strip()
+            except:
+                pass
+
             authors = [author["name"] for author in entry.authors]
             tags = [tag["term"] for tag in entry.tags]
             pub_date = parser.parse(entry.published)
@@ -442,8 +448,10 @@ async def fetch_tech_crunch():
                 "pub_date": pub_date,
                 "outlet": "tech_crunch",
             }
+
             collection.insert_one(article)
-        except:
+        except Exception as e:
+            print(e)
             updateStatus("tech_crunch", False)
             continue
 
@@ -453,7 +461,8 @@ async def fetch_tech_crunch_connie():
     updateStatus("tech_crunch_connie", True)
     try:
         feed = feedparser.parse(url)
-    except:
+    except Exception as e:
+        print(e)
         updateStatus("tech_crunch_connie", False)
         return
 
@@ -465,7 +474,11 @@ async def fetch_tech_crunch_connie():
 
             link = entry.link
             soup = BeautifulSoup(entry.summary, "html.parser")
-            description = soup.find("p").text.strip()
+            description = soup.text
+            try:
+                description = soup.find("p").text.strip()
+            except:
+                pass
             authors = [author["name"] for author in entry.authors]
             tags = [tag["term"] for tag in entry.tags]
             pub_date = parser.parse(entry.published)
@@ -479,7 +492,8 @@ async def fetch_tech_crunch_connie():
                 "outlet": "tech_crunch_connie",
             }
             collection.insert_one(article)
-        except:
+        except Exception as e:
+            print(e)
             updateStatus("tech_crunch_connie", False)
             continue
 
