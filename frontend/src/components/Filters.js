@@ -2,10 +2,7 @@ import { Divider, HStack, Input, Select, Text, VStack } from "@chakra-ui/react";
 import { forwardRef, useState } from "react";
 import DatePicker from "react-datepicker";
 
-const defaultSortOptions = [
-  { value: "most_recent", label: "Most Recent" },
-  { value: "most_relevant", label: "Most Relevant" },
-];
+const defaultSortOptions = [{ value: "most_recent", label: "Most Recent" }];
 
 const DatePickerInput = forwardRef(
   ({ value, onClick, className, ...props }, ref) => (
