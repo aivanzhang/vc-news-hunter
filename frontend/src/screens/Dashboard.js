@@ -32,8 +32,8 @@ const Dashboard = () => {
     setIsLoading(true);
     try {
       const response = await axios.post(
-        // "https://fe3c-3-81-162-197.ngrok-free.app/get",
-        "http://localhost:3000/get",
+        "https://fe3c-3-81-162-197.ngrok-free.app/get",
+        // "http://localhost:3000/get",
         {
           selectedSources: Array.from(selectedSources),
           page,
@@ -56,8 +56,8 @@ const Dashboard = () => {
     setIsLoading(true);
     try {
       const response = await axios.post(
-        // "https://fe3c-3-81-162-197.ngrok-free.app/get",
-        "http://localhost:3000/get",
+        "https://fe3c-3-81-162-197.ngrok-free.app/get",
+        // "http://localhost:3000/get",
         {
           selectedSources: Array.from(selectedSources),
           page: 1,
@@ -82,6 +82,7 @@ const Dashboard = () => {
   };
 
   useEffect(() => {
+    if (selectedSources.size === 0) return;
     fetchNewNews();
   }, [selectedSources, sortOption, dateRange]); // eslint-disable-line react-hooks/exhaustive-deps
 
