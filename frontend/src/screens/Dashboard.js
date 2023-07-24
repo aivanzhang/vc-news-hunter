@@ -1,4 +1,5 @@
 import {
+  Badge,
   Button,
   ButtonGroup,
   Divider,
@@ -26,19 +27,21 @@ const Dashboard = () => {
   const [sortOption, setSortOption] = useState("most_recent");
   const [isLoading, setIsLoading] = useState(false);
   const [dateRange, setDateRange] = useState([null, null]);
+  const [types, setTypes] = useState(new Set(["Startup"]));
 
   const fetchNews = async () => {
     if (isLoading) return; // Prevent multiple simultaneous requests
     setIsLoading(true);
     try {
       const response = await axios.post(
-        "https://fe3c-3-81-162-197.ngrok-free.app/get",
-        // "http://localhost:3000/get",
+        // "https://fe3c-3-81-162-197.ngrok-free.app/get",
+        "http://localhost:3000/get",
         {
           selectedSources: Array.from(selectedSources),
           page,
           dateRange,
           sortOption,
+          types: Array.from(types),
         }
       );
       const fetchedNews = response.data;
@@ -56,13 +59,14 @@ const Dashboard = () => {
     setIsLoading(true);
     try {
       const response = await axios.post(
-        "https://fe3c-3-81-162-197.ngrok-free.app/get",
-        // "http://localhost:3000/get",
+        // "https://fe3c-3-81-162-197.ngrok-free.app/get",
+        "http://localhost:3000/get",
         {
           selectedSources: Array.from(selectedSources),
           page: 1,
           dateRange,
           sortOption,
+          types: Array.from(types),
         }
       );
       const fetchedNews = response.data;
@@ -84,7 +88,7 @@ const Dashboard = () => {
   useEffect(() => {
     if (selectedSources.size === 0) return;
     fetchNewNews();
-  }, [selectedSources, sortOption, dateRange]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [selectedSources, sortOption, dateRange, types]); // eslint-disable-line react-hooks/exhaustive-deps
 
   return (
     <Layout>
@@ -99,6 +103,16 @@ const Dashboard = () => {
             onSelectSort={(opt) => setSortOption(opt)}
             dateRange={dateRange}
             setDateRange={setDateRange}
+            types={types}
+            onChangeTypes={(newType) => {
+              const newTypes = new Set(types);
+              if (newTypes.has(newType)) {
+                newTypes.delete(newType);
+              } else {
+                newTypes.add(newType);
+              }
+              setTypes(newTypes);
+            }}
           />
           <ButtonGroup gap="2" justifyContent="flex-start" w="full">
             <Button
@@ -175,7 +189,7 @@ const Dashboard = () => {
                 />
               </HStack>
               <Text>{item.description}</Text>
-              <Text fontSize="sm" pt={4}>
+              <Text fontSize="sm" pt={4} pb={2}>
                 {item.authors.length > 0 && (
                   <>
                     <strong>{item.authors.join(", ")}</strong> •{" "}
@@ -183,6 +197,9 @@ const Dashboard = () => {
                 )}
                 {new Date(item.pub_date).toLocaleString()}
               </Text>
+              <Badge colorScheme="primary" rounded="md">
+                {item.type}
+              </Badge>
             </VStack>
           ))}
         </VStack>

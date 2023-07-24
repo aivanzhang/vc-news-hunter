@@ -11,6 +11,7 @@ const newsSchema = new mongoose.Schema({
   tags: [String],
   title: String,
   outlet: String,
+  type: String,
 });
 
 const onlineSchema = new mongoose.Schema({
@@ -66,7 +67,7 @@ function convertSources(selectedSources) {
 // Define a route to handle the database request
 app.post("/get", (req, res) => {
   // Get data from the request body
-  const { selectedSources, page, dateRange, sortOption } = req.body;
+  const { selectedSources, page, dateRange, sortOption, types } = req.body;
   const limit = 10;
   const newsSourceCollection = mongoose.model("articles", newsSchema);
   let dateRangeQuery = {};
@@ -79,6 +80,8 @@ app.post("/get", (req, res) => {
   if (Object.keys(dateRangeQuery).length > 0) {
     dateRangeQuery = { pub_date: { ...dateRangeQuery } };
   }
+  dateRangeQuery["type"] = { $in: types };
+  console.log(dateRangeQuery);
   newsSourceCollection
     .find(dateRangeQuery)
     .or(convertSources(selectedSources))

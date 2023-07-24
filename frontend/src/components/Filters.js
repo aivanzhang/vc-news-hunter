@@ -1,9 +1,20 @@
-import { Divider, HStack, Input, Select, Text, VStack } from "@chakra-ui/react";
+import {
+  Checkbox,
+  CheckboxGroup,
+  Divider,
+  HStack,
+  Input,
+  Select,
+  Stack,
+  Text,
+  VStack,
+  Wrap,
+} from "@chakra-ui/react";
 import { forwardRef, useState } from "react";
 import DatePicker from "react-datepicker";
 
 const defaultSortOptions = [{ value: "most_recent", label: "Most Recent" }];
-
+const newsTypes = ["World", "Sports", "Business", "Sci/Tech", "Startup"];
 const DatePickerInput = forwardRef(
   ({ value, onClick, className, ...props }, ref) => (
     <Input
@@ -21,6 +32,8 @@ const Filters = ({
   onSelectSort = () => {},
   dateRange,
   setDateRange,
+  types,
+  onChangeTypes = () => {},
 }) => {
   const [selectedOption, setSelectedOption] = useState("");
 
@@ -62,6 +75,21 @@ const Filters = ({
           </option>
         ))}
       </Select>
+      <Text fontWeight="bold">Type of News</Text>
+      <CheckboxGroup colorScheme="green" value={Array.from(types)}>
+        <Wrap spacing={3}>
+          {newsTypes.map((type) => (
+            <Checkbox
+              key={type}
+              value={type}
+              colorScheme="primary"
+              onChange={() => onChangeTypes(type)}
+            >
+              {type}
+            </Checkbox>
+          ))}
+        </Wrap>
+      </CheckboxGroup>
       <Divider borderColor="black" />
     </VStack>
   );
