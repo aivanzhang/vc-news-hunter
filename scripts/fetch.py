@@ -12,6 +12,9 @@ import requests
 import re
 import imaplib
 import email
+from transformers import AutoModelForSequenceClassification, AutoTokenizer, pipeline
+import torch
+import torch.nn.functional as F
 
 # Set up MongoDB connection
 # Update with your MongoDB connection details
@@ -22,6 +25,33 @@ client = MongoClient(uri, server_api=ServerApi("1"))
 db = client["vc_news"]  # Name of the database
 collection = db["articles"]  # Name of the collection
 status_collection = db["onlines"]  # Name of the collection
+
+torch.set_printoptions(sci_mode=False)
+id2label = {0: "World", 1: "Sports", 2: "Business", 3: "Sci/Tech", 4: "Startup"}
+label2id = {"World": 0, "Sports": 1, "Business": 2, "Sci/Tech": 3, "Startup": 4}
+
+model = AutoModelForSequenceClassification.from_pretrained(
+    "./model", num_labels=5, id2label=id2label, label2id=label2id
+)
+tokenizer = AutoTokenizer.from_pretrained("distilbert-base-uncased")
+summarizer = pipeline("summarization", model="sshleifer/distilbart-cnn-12-6")
+
+
+def get_news_type(headline):
+    inputs = tokenizer(headline, return_tensors="pt")
+    outputs = model(**inputs)
+    logits = outputs.logits
+    probs = F.softmax(logits, dim=1)
+    predicted_label = id2label[int(torch.argmax(probs, dim=1).item())]
+    return predicted_label
+
+
+def get_description(text):
+    if len(text.split(" ")) < 150:
+        return text
+    return summarizer(text[:1024], max_length=150, min_length=50, do_sample=False)[0][
+        "summary_text"
+    ]
 
 
 async def fetch():
@@ -80,9 +110,10 @@ async def fetch_nyt():
                 "link": link,
                 "authors": authors,
                 "tags": tags,
-                "description": description,
+                "description": get_description(description),
                 "pub_date": pub_date,
                 "outlet": "nyt",
+                "type": get_news_type(title),
             }
             collection.insert_one(article)
         except:
@@ -121,9 +152,10 @@ async def fetch_wsj():
                     "link": link,
                     "authors": authors,
                     "tags": tags,
-                    "description": description,
+                    "description": get_description(description),
                     "pub_date": pub_date,
                     "outlet": "wsj",
+                    "type": get_news_type(title),
                 }
                 collection.insert_one(article)
             except:
@@ -155,9 +187,10 @@ async def fetch_forbes():
                 "link": link,
                 "authors": authors,
                 "tags": tags,
-                "description": description,
+                "description": get_description(description),
                 "pub_date": pub_date,
                 "outlet": "forbes",
+                "type": get_news_type(title),
             }
             collection.insert_one(article)
         except:
@@ -190,9 +223,10 @@ async def fetch_axios():
                 "link": link,
                 "authors": authors,
                 "tags": tags,
-                "description": description,
+                "description": get_description(description),
                 "pub_date": pub_date,
                 "outlet": "axios",
+                "type": get_news_type(title),
             }
             collection.insert_one(article)
         except:
@@ -235,9 +269,10 @@ async def fetch_wp():
                     "link": link,
                     "authors": authors,
                     "tags": tags,
-                    "description": description,
+                    "description": get_description(description),
                     "pub_date": pub_date,
                     "outlet": "wp",
+                    "type": get_news_type(title),
                 }
                 collection.insert_one(article)
             except:
@@ -273,9 +308,10 @@ async def fetch_information():
                 "link": link,
                 "authors": authors,
                 "tags": tags,
-                "description": description,
+                "description": get_description(description),
                 "pub_date": pub_date,
                 "outlet": "information",
+                "type": get_news_type(title),
             }
             collection.insert_one(article)
         except:
@@ -402,9 +438,10 @@ async def fetch_cnbc():
                     "link": link,
                     "authors": authors,
                     "tags": tags,
-                    "description": description,
+                    "description": get_description(description),
                     "pub_date": pub_date,
                     "outlet": "cnbc",
+                    "type": get_news_type(title),
                 }
                 collection.insert_one(article)
             except:
@@ -444,9 +481,10 @@ async def fetch_tech_crunch():
                 "link": link,
                 "authors": authors,
                 "tags": tags,
-                "description": description,
+                "description": get_description(description),
                 "pub_date": pub_date,
                 "outlet": "tech_crunch",
+                "type": get_news_type(title),
             }
 
             collection.insert_one(article)
@@ -487,9 +525,10 @@ async def fetch_tech_crunch_connie():
                 "link": link,
                 "authors": authors,
                 "tags": tags,
-                "description": description,
+                "description": get_description(description),
                 "pub_date": pub_date,
                 "outlet": "tech_crunch_connie",
+                "type": get_news_type(title),
             }
             collection.insert_one(article)
         except Exception as e:
@@ -523,9 +562,10 @@ async def fetch_fortune():
                 "link": link,
                 "authors": authors,
                 "tags": tags,
-                "description": description,
+                "description": get_description(description),
                 "pub_date": pub_date,
                 "outlet": "fortune",
+                "type": get_news_type(title),
             }
             collection.insert_one(article)
         except:
@@ -590,9 +630,10 @@ async def fetch_verge():
                     "link": link,
                     "authors": authors,
                     "tags": tags,
-                    "description": description,
+                    "description": get_description(description),
                     "pub_date": pub_date,
                     "outlet": "verge",
+                    "type": get_news_type(title),
                 }
                 collection.insert_one(article)
             except:
@@ -624,9 +665,10 @@ async def fetch_bloomberg():
                 "link": link,
                 "authors": authors,
                 "tags": tags,
-                "description": description,
+                "description": get_description(description),
                 "pub_date": pub_date,
                 "outlet": "bloomberg",
+                "type": get_news_type(title),
             }
             collection.insert_one(article)
         except:
@@ -658,9 +700,10 @@ async def fetch_insider():
                 "link": link,
                 "authors": authors,
                 "tags": tags,
-                "description": description,
+                "description": get_description(description),
                 "pub_date": pub_date,
                 "outlet": "insider",
+                "type": get_news_type(title),
             }
             collection.insert_one(article)
         except:
@@ -698,9 +741,10 @@ async def fetch_semafor():
                     "link": "https://www.semafor.com" + link,
                     "authors": authors,
                     "tags": tags,
-                    "description": description,
+                    "description": get_description(description),
                     "pub_date": pub_date,
                     "outlet": "semafor",
+                    "type": get_news_type(title),
                 }
                 collection.insert_one(article)
         except:
@@ -764,9 +808,10 @@ async def fetch_strictly_vc():
                         "link": link,
                         "authors": authors,
                         "tags": tags,
-                        "description": description,
+                        "description": get_description(description),
                         "pub_date": pub_date,
                         "outlet": "strictly_vc",
+                        "type": get_news_type(title),
                     }
                     collection.insert_one(article)
 
@@ -835,9 +880,10 @@ async def fetch_term_sheet():
                         "link": link,
                         "authors": authors,
                         "tags": tags,
-                        "description": description,
+                        "description": get_description(description),
                         "pub_date": pub_date,
                         "outlet": "termsheet",
+                        "type": get_news_type(title),
                     }
                     collection.insert_one(article)
 
