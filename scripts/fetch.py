@@ -38,6 +38,8 @@ summarizer = pipeline("summarization", model="sshleifer/distilbart-cnn-12-6")
 
 
 def get_news_type(headline):
+    if not headline:
+        return ""
     inputs = tokenizer(headline, return_tensors="pt")
     outputs = model(**inputs)
     logits = outputs.logits
@@ -47,6 +49,8 @@ def get_news_type(headline):
 
 
 def get_description(text):
+    if not text:
+        return ""
     if len(text.split(" ")) < 150:
         return text
     return summarizer(text[:1024], max_length=150, min_length=50, do_sample=False)[0][
