@@ -12,6 +12,11 @@ const newsSchema = new mongoose.Schema({
   title: String,
   outlet: String,
   type: String,
+  Misc: Number,
+  World: Number,
+  Sports: Number,
+  Business: Number,
+  "Sci/Tech": Number,
 });
 
 const onlineSchema = new mongoose.Schema({
@@ -81,7 +86,7 @@ app.post("/get", (req, res) => {
     dateRangeQuery = { pub_date: { ...dateRangeQuery } };
   }
   dateRangeQuery["type"] = { $in: types };
-  console.log(dateRangeQuery);
+
   newsSourceCollection
     .find(dateRangeQuery)
     .or(convertSources(selectedSources))

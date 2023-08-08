@@ -34,7 +34,7 @@ const Dashboard = () => {
     setIsLoading(true);
     try {
       const response = await axios.post(
-        "https://fa55-54-224-28-130.ngrok-free.app/get",
+        "https://dd30-54-211-253-213.ngrok-free.app/get",
         // "http://localhost:3000/get",
         {
           selectedSources: Array.from(selectedSources),
@@ -59,8 +59,8 @@ const Dashboard = () => {
     setIsLoading(true);
     try {
       const response = await axios.post(
-        "https://fa55-54-224-28-130.ngrok-free.app/get",
-        // "http://localhost:3000/get",
+        // "https://fa55-54-224-28-130.ngrok-free.app/get",
+        "http://localhost:3000/get",
         {
           selectedSources: Array.from(selectedSources),
           page: 1,
