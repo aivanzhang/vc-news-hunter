@@ -12,7 +12,7 @@ import requests
 import re
 import imaplib
 import email
-from transformers import AutoModelForSequenceClassification, AutoTokenizer, pipeline
+from transformers import pipeline
 import torch
 import torch.nn.functional as F
 
@@ -29,23 +29,87 @@ status_collection = db["onlines"]  # Name of the collection
 torch.set_printoptions(sci_mode=False)
 id2label = {0: "World", 1: "Sports", 2: "Business", 3: "Sci/Tech", 4: "Startup"}
 label2id = {"World": 0, "Sports": 1, "Business": 2, "Sci/Tech": 3, "Startup": 4}
-
-model = AutoModelForSequenceClassification.from_pretrained(
-    "./model", num_labels=5, id2label=id2label, label2id=label2id
-)
-tokenizer = AutoTokenizer.from_pretrained("distilbert-base-uncased")
 summarizer = pipeline("summarization", model="sshleifer/distilbart-cnn-12-6")
+classifier_a = pipeline(
+    "text-classification", model="alimazhar-110/website_classification"
+)
+classifier_b = pipeline(
+    "text-classification", model="wesleyacheng/news-topic-classification-with-bert"
+)
+
+label_mappings = {
+    "News": "World",
+    "Travel": "World",
+    "Social Networking and Messaging": "Sci/Tech",
+    "Sports": "Sports",
+    "Law and Government": "World",
+    "E-Commerce": "Business",
+    "Computers and Technology": "Sci/Tech",
+    "Business/Corporate": "Business",
+    "Streaming Services": "Misc",
+    "Photography": "Misc",
+    "Health and Fitness": "Misc",
+    "Games": "Misc",
+    "Forums": "Misc",
+    "Food": "Misc",
+    "Education": "Misc",
+    "Adult": "Misc",
+}
 
 
-def get_news_type(headline):
+def get_classifier_a(headline):
+    results: list = classifier_a(headline, top_k=3)
+    result = {}
+
+    for res in results:
+        label = label_mappings[res["label"]]
+        score = res["score"]
+        if score < 0.1:
+            continue
+        if label in result:
+            result[label] += score
+        else:
+            result[label] = score
+
+    return result
+
+
+def get_classifier_b(headline):
+    results: list = classifier_b(headline, top_k=3)
+    result = {}
+    for res in results:
+        score = res["score"]
+        if score < 0.1:
+            continue
+        result[res["label"]] = score
+
+    return result
+
+
+def get_final_weights(headline):
+    a = get_classifier_a(headline)
+    b = get_classifier_b(headline)
+    final_res = {}
+
+    for news_type, score in a.items():
+        final_res[news_type] = score * 0.4
+
+    for news_type, score in b.items():
+        if news_type in final_res:
+            final_res[news_type] += score * 0.6
+        else:
+            final_res[news_type] = score * 0.6
+
+    for news_type, score in final_res.items():
+        final_res[news_type] = min(1, score)
+
+    return final_res
+
+
+def get_news_types(headline):
     if not headline:
-        return ""
-    inputs = tokenizer(headline, return_tensors="pt")
-    outputs = model(**inputs)
-    logits = outputs.logits
-    probs = F.softmax(logits, dim=1)
-    predicted_label = id2label[int(torch.argmax(probs, dim=1).item())]
-    return predicted_label
+        return {}
+    return get_final_weights(headline)
 
 
 def get_description(text):
@@ -117,7 +181,7 @@ async def fetch_nyt():
                 "description": get_description(description),
                 "pub_date": pub_date,
                 "outlet": "nyt",
-                "type": get_news_type(title),
+                **get_news_types(title),
             }
             collection.insert_one(article)
         except:
@@ -159,7 +223,7 @@ async def fetch_wsj():
                     "description": get_description(description),
                     "pub_date": pub_date,
                     "outlet": "wsj",
-                    "type": get_news_type(title),
+                    **get_news_types(title),
                 }
                 collection.insert_one(article)
             except:
@@ -194,7 +258,7 @@ async def fetch_forbes():
                 "description": get_description(description),
                 "pub_date": pub_date,
                 "outlet": "forbes",
-                "type": get_news_type(title),
+                **get_news_types(title),
             }
             collection.insert_one(article)
         except:
@@ -230,7 +294,7 @@ async def fetch_axios():
                 "description": get_description(description),
                 "pub_date": pub_date,
                 "outlet": "axios",
-                "type": get_news_type(title),
+                **get_news_types(title),
             }
             collection.insert_one(article)
         except:
@@ -276,7 +340,7 @@ async def fetch_wp():
                     "description": get_description(description),
                     "pub_date": pub_date,
                     "outlet": "wp",
-                    "type": get_news_type(title),
+                    **get_news_types(title),
                 }
                 collection.insert_one(article)
             except:
@@ -315,7 +379,7 @@ async def fetch_information():
                 "description": get_description(description),
                 "pub_date": pub_date,
                 "outlet": "information",
-                "type": get_news_type(title),
+                **get_news_types(title),
             }
             collection.insert_one(article)
         except:
@@ -445,7 +509,7 @@ async def fetch_cnbc():
                     "description": get_description(description),
                     "pub_date": pub_date,
                     "outlet": "cnbc",
-                    "type": get_news_type(title),
+                    **get_news_types(title),
                 }
                 collection.insert_one(article)
             except:
@@ -488,7 +552,7 @@ async def fetch_tech_crunch():
                 "description": get_description(description),
                 "pub_date": pub_date,
                 "outlet": "tech_crunch",
-                "type": get_news_type(title),
+                **get_news_types(title),
             }
 
             collection.insert_one(article)
@@ -532,7 +596,7 @@ async def fetch_tech_crunch_connie():
                 "description": get_description(description),
                 "pub_date": pub_date,
                 "outlet": "tech_crunch_connie",
-                "type": get_news_type(title),
+                **get_news_types(title),
             }
             collection.insert_one(article)
         except Exception as e:
@@ -569,7 +633,7 @@ async def fetch_fortune():
                 "description": get_description(description),
                 "pub_date": pub_date,
                 "outlet": "fortune",
-                "type": get_news_type(title),
+                **get_news_types(title),
             }
             collection.insert_one(article)
         except:
@@ -637,7 +701,7 @@ async def fetch_verge():
                     "description": get_description(description),
                     "pub_date": pub_date,
                     "outlet": "verge",
-                    "type": get_news_type(title),
+                    **get_news_types(title),
                 }
                 collection.insert_one(article)
             except:
@@ -672,7 +736,7 @@ async def fetch_bloomberg():
                 "description": get_description(description),
                 "pub_date": pub_date,
                 "outlet": "bloomberg",
-                "type": get_news_type(title),
+                **get_news_types(title),
             }
             collection.insert_one(article)
         except:
@@ -707,7 +771,7 @@ async def fetch_insider():
                 "description": get_description(description),
                 "pub_date": pub_date,
                 "outlet": "insider",
-                "type": get_news_type(title),
+                **get_news_types(title),
             }
             collection.insert_one(article)
         except:
@@ -748,7 +812,7 @@ async def fetch_semafor():
                     "description": get_description(description),
                     "pub_date": pub_date,
                     "outlet": "semafor",
-                    "type": get_news_type(title),
+                    **get_news_types(title),
                 }
                 collection.insert_one(article)
         except:
@@ -815,7 +879,7 @@ async def fetch_strictly_vc():
                         "description": get_description(description),
                         "pub_date": pub_date,
                         "outlet": "strictly_vc",
-                        "type": get_news_type(title),
+                        **get_news_types(title),
                     }
                     collection.insert_one(article)
 
@@ -887,7 +951,7 @@ async def fetch_term_sheet():
                         "description": get_description(description),
                         "pub_date": pub_date,
                         "outlet": "termsheet",
-                        "type": get_news_type(title),
+                        **get_news_types(title),
                     }
                     collection.insert_one(article)
 

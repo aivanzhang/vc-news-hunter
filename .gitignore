@@ -1,6 +1,9 @@
 node_modules/
 venv/
 *.pem
-classification/news_classifier
 classification/model
+classification/news_classifier
+classification/model_2
+classification/news_classifier_2
+classification/store
 scripts/model
