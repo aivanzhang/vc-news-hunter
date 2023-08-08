@@ -103,6 +103,9 @@ def get_final_weights(headline):
     for news_type, score in final_res.items():
         final_res[news_type] = min(1, score)
 
+    max_key = max(final_res, key=final_res.get)
+    final_res["type"] = max_key
+
     return final_res
 
 
