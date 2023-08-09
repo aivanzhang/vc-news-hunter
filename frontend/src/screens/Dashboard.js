@@ -112,6 +112,7 @@ const Dashboard = () => {
   useEffect(() => {
     if (selectedSources.size === 0) return;
     fetchNewNews();
+    //eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
     selectedSources,
     sortOption,
@@ -119,7 +120,7 @@ const Dashboard = () => {
     types,
     sciTechMetric,
     businessMetric,
-  ]); // eslint-disable-line react-hooks/exhaustive-deps
+  ]);
 
   return (
     <Layout>
