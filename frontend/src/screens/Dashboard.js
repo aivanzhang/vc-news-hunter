@@ -41,6 +41,8 @@ const Dashboard = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [dateRange, setDateRange] = useState([null, null]);
   const [types, setTypes] = useState(new Set(["Startup"]));
+  const [sciTechMetric, setSciTechMetric] = useState(0.5);
+  const [businessMetric, setBusinessMetric] = useState(0.5);
 
   const fetchNews = async () => {
     if (isLoading) return; // Prevent multiple simultaneous requests
@@ -80,6 +82,8 @@ const Dashboard = () => {
           dateRange,
           sortOption,
           types: Array.from(types),
+          sciTechMetric,
+          businessMetric
         }
       );
       const fetchedNews = response.data;
@@ -98,10 +102,18 @@ const Dashboard = () => {
     }
   };
 
+  const onFinishSettingStartupValue = (type, value) => {
+    if (type === "Sci/Tech") {
+      setSciTechMetric(value / 100)
+    } else if (type === "Business") {
+      setBusinessMetric(value / 100)
+    }
+  }
+
   useEffect(() => {
     if (selectedSources.size === 0) return;
     fetchNewNews();
-  }, [selectedSources, sortOption, dateRange, types]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [selectedSources, sortOption, dateRange, types, sciTechMetric, businessMetric]); // eslint-disable-line react-hooks/exhaustive-deps
 
   return (
     <Layout>
@@ -126,6 +138,7 @@ const Dashboard = () => {
               }
               setTypes(newTypes);
             }}
+            onSliderChangeEnd={onFinishSettingStartupValue}
           />
           <ButtonGroup gap="2" justifyContent="flex-start" w="full">
             <Button

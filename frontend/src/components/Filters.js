@@ -8,12 +8,16 @@ import {
   Text,
   VStack,
   Wrap,
+  Slider,
+  SliderTrack,
+  SliderFilledTrack,
+  SliderThumb,
 } from "@chakra-ui/react";
 import { forwardRef, useState } from "react";
 import DatePicker from "react-datepicker";
 
 const defaultSortOptions = [{ value: "most_recent", label: "Most Recent" }];
-const newsTypes = ["World", "Sports", "Business", "Sci/Tech", "Startup"];
+const newsTypes = ["World", "Sports", "Business", "Sci/Tech", "Startup", "Misc"];
 const DatePickerInput = forwardRef(
   ({ value, onClick, className, ...props }, ref) => (
     <Input
@@ -28,13 +32,16 @@ const DatePickerInput = forwardRef(
 
 const Filters = ({
   sortOptions = defaultSortOptions,
-  onSelectSort = () => {},
+  onSelectSort = () => { },
   dateRange,
   setDateRange,
   types,
-  onChangeTypes = () => {},
+  onChangeTypes = () => { },
+  onSliderChangeEnd = () => { },
 }) => {
   const [selectedOption, setSelectedOption] = useState("");
+  const [businessSliderValue, setBusinessSliderValue] = useState(50);
+  const [sciTechSliderValue, setSciTechSliderValue] = useState(50);
 
   const handleSelectSort = (event) => {
     const option = event.target.value;
@@ -89,6 +96,36 @@ const Filters = ({
           ))}
         </Wrap>
       </CheckboxGroup>
+      {types.has("Startup") && <Text fontWeight="bold" w="full">Startup Tuning</Text>}
+      {types.has("Startup") && (
+        <VStack w="full">
+          <Text w="full">Business: {businessSliderValue / 100}</Text>
+          <Slider
+            defaultValue={50}
+            min={0}
+            max={100}
+            onChange={(val) => setBusinessSliderValue(val)}
+            onChangeEnd={(val) => onSliderChangeEnd("Business", val)} >
+            <SliderTrack>
+              <SliderFilledTrack />
+            </SliderTrack>
+            <SliderThumb />
+          </Slider>
+          <Text w="full">Sci/Tech: {sciTechSliderValue / 100}</Text>
+          <Slider
+            defaultValue={50}
+            min={0}
+            max={100}
+            onChange={(val) => setSciTechSliderValue(val)}
+            onChangeEnd={(val) => onSliderChangeEnd("Sci/Tech", val)}
+          >
+            <SliderTrack>
+              <SliderFilledTrack />
+            </SliderTrack>
+            <SliderThumb />
+          </Slider>
+        </VStack>
+      )}
       <Divider borderColor="black" />
     </VStack>
   );
