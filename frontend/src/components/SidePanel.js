@@ -24,8 +24,8 @@ const SidePanel = ({ newsSources, setNewsSources }) => {
     const fetchStatuses = async () => {
       try {
         const response = await axios.post(
-          "https://dd30-54-211-253-213.ngrok-free.app/getStatuses",
-          // "http://localhost:3000/getStatuses",
+          // "https://dd30-54-211-253-213.ngrok-free.app/getStatuses",
+          "http://localhost:3000/getStatuses",
           {}
         );
         const data = response.data;

@@ -18,6 +18,19 @@ import Filters from "../components/Filters";
 import { toast } from "react-toastify";
 import sources from "../sources.json";
 
+
+const CATEGORIES = [
+  "World", "Sports", "Business", "Sci/Tech", "Misc"
+]
+
+function getSortedCategories(article) {
+  const sortedCategories = Object.keys(article).filter((key) => CATEGORIES.includes(key)).sort((a, b) => {
+    return article[b] - article[a]
+  })
+  console.log(sortedCategories)
+  return sortedCategories
+}
+
 const Dashboard = () => {
   const [selectedSources, setSelectedSources] = useState(
     new Set(Object.keys(sources))
@@ -34,8 +47,8 @@ const Dashboard = () => {
     setIsLoading(true);
     try {
       const response = await axios.post(
-        "https://dd30-54-211-253-213.ngrok-free.app/get",
-        // "http://localhost:3000/get",
+        // "https://dd30-54-211-253-213.ngrok-free.app/get",
+        "http://localhost:3000/get",
         {
           selectedSources: Array.from(selectedSources),
           page,
@@ -59,8 +72,8 @@ const Dashboard = () => {
     setIsLoading(true);
     try {
       const response = await axios.post(
-        "https://dd30-54-211-253-213.ngrok-free.app/get",
-        // "http://localhost:3000/get",
+        // "https://dd30-54-211-253-213.ngrok-free.app/get",
+        "http://localhost:3000/get",
         {
           selectedSources: Array.from(selectedSources),
           page: 1,
@@ -197,9 +210,14 @@ const Dashboard = () => {
                 )}
                 {new Date(item.pub_date).toLocaleString()}
               </Text>
-              <Badge colorScheme="primary" rounded="md">
-                {item.type}
-              </Badge>
+              <HStack>
+                {
+                  getSortedCategories(item).map(
+                    (category) => (<Badge colorScheme="primary" rounded="md" variant={category === item["type"] ? "solid" : "outline"}>
+                      {category}: {item[category].toFixed(2)}
+                    </Badge>))
+                }
+              </HStack>
             </VStack>
           ))}
         </VStack>
