@@ -72,9 +72,16 @@ function convertSources(selectedSources) {
 // Define a route to handle the database request
 app.post("/get", (req, res) => {
   // Get data from the request body
-  const { selectedSources, page, dateRange, sortOption, types, sciTechMetric, businessMetric } = req.body;
+  const {
+    selectedSources,
+    page,
+    dateRange,
+    sortOption,
+    types,
+    sciTechMetric,
+    businessMetric,
+  } = req.body;
   const new_types = types.filter((type) => type !== "Startup");
-  console.log(sciTechMetric, businessMetric)
   const limit = 10;
   const newsSourceCollection = mongoose.model("articles", newsSchema);
   let dateRangeQuery = {};
@@ -90,9 +97,16 @@ app.post("/get", (req, res) => {
   if (new_types.length > 0) {
     dateRangeQuery["type"] = { $in: new_types };
   }
+  if (sciTechMetric) {
+    dateRangeQuery["Sci/Tech"] = { $gte: sciTechMetric };
+  }
+  if (businessMetric) {
+    dateRangeQuery["Business"] = { $gte: businessMetric };
+  }
+
   newsSourceCollection
     .find(dateRangeQuery)
-    .or(convertSources(selectedSources).concat([{ $and: [{ "Sci/Tech": { $gte: sciTechMetric } }, { Business: { $gte: businessMetric } }] }]))
+    .or(convertSources(selectedSources))
     .sort(sortOption === "most_recent" ? { pub_date: -1 } : {})
     .skip((page - 1) * limit)
     .limit(limit)
