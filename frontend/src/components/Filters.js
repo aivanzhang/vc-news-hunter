@@ -17,7 +17,14 @@ import { forwardRef, useState } from "react";
 import DatePicker from "react-datepicker";
 
 const defaultSortOptions = [{ value: "most_recent", label: "Most Recent" }];
-const newsTypes = ["World", "Sports", "Business", "Sci/Tech", "Startup", "Misc"];
+const newsTypes = [
+  "World",
+  "Sports",
+  "Business",
+  "Sci/Tech",
+  "Startup",
+  "Misc",
+];
 const DatePickerInput = forwardRef(
   ({ value, onClick, className, ...props }, ref) => (
     <Input
@@ -32,15 +39,15 @@ const DatePickerInput = forwardRef(
 
 const Filters = ({
   sortOptions = defaultSortOptions,
-  onSelectSort = () => { },
+  onSelectSort = () => {},
   dateRange,
   setDateRange,
   types,
-  onChangeTypes = () => { },
-  onSliderChangeEnd = () => { },
+  onChangeTypes = () => {},
+  onSliderChangeEnd = () => {},
 }) => {
   const [selectedOption, setSelectedOption] = useState("");
-  const [businessSliderValue, setBusinessSliderValue] = useState(50);
+  const [businessSliderValue, setBusinessSliderValue] = useState(25);
   const [sciTechSliderValue, setSciTechSliderValue] = useState(50);
 
   const handleSelectSort = (event) => {
@@ -96,16 +103,21 @@ const Filters = ({
           ))}
         </Wrap>
       </CheckboxGroup>
-      {types.has("Startup") && <Text fontWeight="bold" w="full">Startup Tuning</Text>}
+      {types.has("Startup") && (
+        <Text fontWeight="bold" w="full">
+          Startup Tuning
+        </Text>
+      )}
       {types.has("Startup") && (
         <VStack w="full">
           <Text w="full">Business: {businessSliderValue / 100}</Text>
           <Slider
-            defaultValue={50}
+            defaultValue={25}
             min={0}
             max={100}
             onChange={(val) => setBusinessSliderValue(val)}
-            onChangeEnd={(val) => onSliderChangeEnd("Business", val)} >
+            onChangeEnd={(val) => onSliderChangeEnd("Business", val)}
+          >
             <SliderTrack>
               <SliderFilledTrack />
             </SliderTrack>

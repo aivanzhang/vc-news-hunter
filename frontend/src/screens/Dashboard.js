@@ -18,17 +18,16 @@ import Filters from "../components/Filters";
 import { toast } from "react-toastify";
 import sources from "../sources.json";
 
-
-const CATEGORIES = [
-  "World", "Sports", "Business", "Sci/Tech", "Misc"
-]
+const CATEGORIES = ["World", "Sports", "Business", "Sci/Tech", "Misc"];
 
 function getSortedCategories(article) {
-  const sortedCategories = Object.keys(article).filter((key) => CATEGORIES.includes(key)).sort((a, b) => {
-    return article[b] - article[a]
-  })
-  console.log(sortedCategories)
-  return sortedCategories
+  const sortedCategories = Object.keys(article)
+    .filter((key) => CATEGORIES.includes(key))
+    .sort((a, b) => {
+      return article[b] - article[a];
+    });
+  console.log(sortedCategories);
+  return sortedCategories;
 }
 
 const Dashboard = () => {
@@ -42,7 +41,7 @@ const Dashboard = () => {
   const [dateRange, setDateRange] = useState([null, null]);
   const [types, setTypes] = useState(new Set(["Startup"]));
   const [sciTechMetric, setSciTechMetric] = useState(0.5);
-  const [businessMetric, setBusinessMetric] = useState(0.5);
+  const [businessMetric, setBusinessMetric] = useState(0.25);
 
   const fetchNews = async () => {
     if (isLoading) return; // Prevent multiple simultaneous requests
@@ -83,7 +82,7 @@ const Dashboard = () => {
           sortOption,
           types: Array.from(types),
           sciTechMetric,
-          businessMetric
+          businessMetric,
         }
       );
       const fetchedNews = response.data;
@@ -104,16 +103,23 @@ const Dashboard = () => {
 
   const onFinishSettingStartupValue = (type, value) => {
     if (type === "Sci/Tech") {
-      setSciTechMetric(value / 100)
+      setSciTechMetric(value / 100);
     } else if (type === "Business") {
-      setBusinessMetric(value / 100)
+      setBusinessMetric(value / 100);
     }
-  }
+  };
 
   useEffect(() => {
     if (selectedSources.size === 0) return;
     fetchNewNews();
-  }, [selectedSources, sortOption, dateRange, types, sciTechMetric, businessMetric]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [
+    selectedSources,
+    sortOption,
+    dateRange,
+    types,
+    sciTechMetric,
+    businessMetric,
+  ]); // eslint-disable-line react-hooks/exhaustive-deps
 
   return (
     <Layout>
@@ -172,6 +178,11 @@ const Dashboard = () => {
           overflowY="scroll"
           onScroll={handleScroll}
         >
+          {news.length === 0 && (
+            <Text fontSize="lg" color="gray">
+              No articles found
+            </Text>
+          )}
           {news.map((item, index) => (
             <VStack
               key={index}
@@ -224,12 +235,22 @@ const Dashboard = () => {
                 {new Date(item.pub_date).toLocaleString()}
               </Text>
               <HStack>
-                {
-                  getSortedCategories(item).map(
-                    (category) => (<Badge colorScheme="primary" rounded="md" variant={category === item["type"] ? "solid" : "outline"}>
-                      {category}: {item[category].toFixed(2)}
-                    </Badge>))
-                }
+                {types.has("Startup") &&
+                  item["Sci/Tech"] > sciTechMetric &&
+                  item["Business"] > businessMetric && (
+                    <Badge colorScheme="primary" rounded="md" variant="solid">
+                      Startup
+                    </Badge>
+                  )}
+                {getSortedCategories(item).map((category) => (
+                  <Badge
+                    colorScheme="primary"
+                    rounded="md"
+                    variant={category === item["type"] ? "solid" : "outline"}
+                  >
+                    {category}: {item[category].toFixed(2)}
+                  </Badge>
+                ))}
               </HStack>
             </VStack>
           ))}
