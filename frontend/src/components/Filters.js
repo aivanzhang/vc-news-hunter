@@ -17,14 +17,7 @@ import { forwardRef, useState } from "react";
 import DatePicker from "react-datepicker";
 
 const defaultSortOptions = [{ value: "most_recent", label: "Most Recent" }];
-const newsTypes = [
-  "World",
-  "Sports",
-  "Business",
-  "Sci/Tech",
-  "Startup",
-  "Misc",
-];
+const newsTypes = ["All", "Startup"];
 const DatePickerInput = forwardRef(
   ({ value, onClick, className, ...props }, ref) => (
     <Input
@@ -80,14 +73,14 @@ const Filters = ({
           customInput={<DatePickerInput />}
         />
       </HStack>
-      <Text fontWeight="bold">Sort By</Text>
+      {/* <Text fontWeight="bold">Sort By</Text>
       <Select value={selectedOption} onChange={handleSelectSort}>
         {sortOptions.map((option) => (
           <option key={option.value} value={option.value}>
             {option.label}
           </option>
         ))}
-      </Select>
+      </Select> */}
       <Text fontWeight="bold">Type of News</Text>
       <CheckboxGroup colorScheme="green" value={Array.from(types)}>
         <Wrap spacing={3}>

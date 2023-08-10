@@ -94,8 +94,10 @@ app.post("/get", (req, res) => {
   if (Object.keys(dateRangeQuery).length > 0) {
     dateRangeQuery = { pub_date: { ...dateRangeQuery } };
   }
-  if (new_types.length > 0) {
-    dateRangeQuery["type"] = { $in: new_types };
+  if (new_types[0] == "All") {
+    dateRangeQuery["type"] = {
+      $in: ["World", "Sports", "Business", "Sci/Tech", "Misc"],
+    };
   }
   if (sciTechMetric) {
     dateRangeQuery["Sci/Tech"] = { $gte: sciTechMetric };
