@@ -6,6 +6,7 @@ import {
   HStack,
   Heading,
   IconButton,
+  Spacer,
   Text,
   VStack,
 } from "@chakra-ui/react";
@@ -56,6 +57,8 @@ const Dashboard = () => {
           dateRange,
           sortOption,
           types: Array.from(types),
+          sciTechMetric,
+          businessMetric,
         }
       );
       const fetchedNews = response.data;
@@ -227,15 +230,16 @@ const Dashboard = () => {
                 />
               </HStack>
               <Text>{item.description}</Text>
-              <Text fontSize="sm" pt={4} pb={2}>
-                {item.authors.length > 0 && (
-                  <>
-                    <strong>{item.authors.join(", ")}</strong> •{" "}
-                  </>
-                )}
-                {new Date(item.pub_date).toLocaleString()}
-              </Text>
-              <HStack>
+              <HStack alignItems="center" w="full">
+                <Text fontSize="sm">
+                  {item.authors.length > 0 && (
+                    <>
+                      <strong>{item.authors.join(", ")}</strong> •{" "}
+                    </>
+                  )}
+                  {new Date(item.pub_date).toLocaleString()}
+                </Text>
+                <Spacer />
                 {types.has("Startup") &&
                   item["Sci/Tech"] > sciTechMetric &&
                   item["Business"] > businessMetric && (
