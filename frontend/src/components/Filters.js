@@ -4,7 +4,7 @@ import {
   Divider,
   HStack,
   Input,
-  Select,
+  // Select,
   Text,
   VStack,
   Wrap,
@@ -39,15 +39,15 @@ const Filters = ({
   onChangeTypes = () => {},
   onSliderChangeEnd = () => {},
 }) => {
-  const [selectedOption, setSelectedOption] = useState("");
+  // const [selectedOption, setSelectedOption] = useState("");
   const [businessSliderValue, setBusinessSliderValue] = useState(25);
   const [sciTechSliderValue, setSciTechSliderValue] = useState(50);
 
-  const handleSelectSort = (event) => {
-    const option = event.target.value;
-    setSelectedOption(option);
-    onSelectSort(option);
-  };
+  // const handleSelectSort = (event) => {
+  //   const option = event.target.value;
+  //   setSelectedOption(option);
+  //   onSelectSort(option);
+  // };
 
   return (
     <VStack
