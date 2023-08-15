@@ -27,7 +27,6 @@ function getSortedCategories(article) {
     .sort((a, b) => {
       return article[b] - article[a];
     });
-  console.log(sortedCategories);
   return sortedCategories;
 }
 
@@ -56,7 +55,7 @@ const Dashboard = () => {
           page,
           dateRange,
           sortOption,
-          types: Array.from(types),
+          types: types.has("All") ? ["All"] : ["Startup"],
           sciTechMetric,
           businessMetric,
         }
@@ -74,6 +73,7 @@ const Dashboard = () => {
   const fetchNewNews = async () => {
     if (isLoading) return; // Prevent multiple simultaneous requests
     setIsLoading(true);
+    // console.log(types);
     try {
       const response = await axios.post(
         "https://dd30-54-211-253-213.ngrok-free.app/get",
@@ -83,7 +83,7 @@ const Dashboard = () => {
           page: 1,
           dateRange,
           sortOption,
-          types: Array.from(types),
+          types: types.has("All") ? ["All"] : ["Startup"],
           sciTechMetric,
           businessMetric,
         }
@@ -247,8 +247,9 @@ const Dashboard = () => {
                       Startup
                     </Badge>
                   )}
-                {getSortedCategories(item).map((category) => (
+                {getSortedCategories(item).map((category, index) => (
                   <Badge
+                    key={index}
                     colorScheme="primary"
                     rounded="md"
                     variant={category === item["type"] ? "solid" : "outline"}

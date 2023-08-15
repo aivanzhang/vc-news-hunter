@@ -98,12 +98,13 @@ app.post("/get", (req, res) => {
     dateRangeQuery["type"] = {
       $in: ["World", "Sports", "Business", "Sci/Tech", "Misc"],
     };
-  }
-  if (sciTechMetric) {
-    dateRangeQuery["Sci/Tech"] = { $gte: sciTechMetric };
-  }
-  if (businessMetric) {
-    dateRangeQuery["Business"] = { $gte: businessMetric };
+  } else {
+    if (sciTechMetric) {
+      dateRangeQuery["Sci/Tech"] = { $gte: sciTechMetric };
+    }
+    if (businessMetric) {
+      dateRangeQuery["Business"] = { $gte: businessMetric };
+    }
   }
 
   newsSourceCollection
