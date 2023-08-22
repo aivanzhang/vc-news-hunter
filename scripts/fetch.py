@@ -161,7 +161,8 @@ async def fetch_nyt():
     updateStatus("nyt", True)
     try:
         feed = feedparser.parse(url)
-    except:
+    except Exception as e:
+        print("NYT Error", e)
         updateStatus("nyt", False)
         return
 
@@ -187,7 +188,8 @@ async def fetch_nyt():
                 **get_news_types(title),
             }
             collection.insert_one(article)
-        except:
+        except Exception as e:
+            print("NYT Error", e)
             updateStatus("nyt", False)
             continue
 
@@ -229,7 +231,8 @@ async def fetch_wsj():
                     **get_news_types(title),
                 }
                 collection.insert_one(article)
-            except:
+            except Exception as e:
+                print("WSJ Error", e)
                 updateStatus("wsj", False)
                 continue
 
@@ -239,7 +242,8 @@ async def fetch_forbes():
     updateStatus("forbes", True)
     try:
         feed = feedparser.parse(url)
-    except:
+    except Exception as e:
+        print("Forbes Error", e)
         updateStatus("forbes", False)
         return
 
@@ -264,7 +268,8 @@ async def fetch_forbes():
                 **get_news_types(title),
             }
             collection.insert_one(article)
-        except:
+        except Exception as e:
+            print("Forbes Error", e)
             updateStatus("forbes", False)
             continue
 
@@ -287,7 +292,7 @@ async def fetch_axios():
             soup = BeautifulSoup(entry.summary, "html.parser")
             description = soup.get_text().strip()
             authors = [author["name"] for author in entry.authors]
-            tags = [tag["term"] for tag in entry.tags]
+            tags = [tag["term"] for tag in entry.tags] if "tags" in entry else []
             pub_date = parser.parse(entry.published)
             article = {
                 "title": title,
@@ -300,7 +305,8 @@ async def fetch_axios():
                 **get_news_types(title),
             }
             collection.insert_one(article)
-        except:
+        except Exception as e:
+            print("Axios Error", e)
             updateStatus("axios", False)
             continue
 
@@ -346,7 +352,8 @@ async def fetch_wp():
                     **get_news_types(title),
                 }
                 collection.insert_one(article)
-            except:
+            except Exception as e:
+                print("Washington Post Error", e)
                 updateStatus("wp", False)
                 continue
 
@@ -385,7 +392,8 @@ async def fetch_information():
                 **get_news_types(title),
             }
             collection.insert_one(article)
-        except:
+        except Exception as e:
+            print("The Information Error", e)
             updateStatus("information", False)
             continue
 
@@ -489,7 +497,8 @@ async def fetch_cnbc():
     for tag, url in url:
         try:
             feed = feedparser.parse(url)
-        except:
+        except Exception as e:
+            print("CNBC Error", e)
             updateStatus("cnbc", False)
             continue
 
@@ -515,7 +524,8 @@ async def fetch_cnbc():
                     **get_news_types(title),
                 }
                 collection.insert_one(article)
-            except:
+            except Exception as e:
+                print("CNBC Error", e)
                 updateStatus("cnbc", False)
                 continue
 
@@ -526,7 +536,7 @@ async def fetch_tech_crunch():
     try:
         feed = feedparser.parse(url)
     except Exception as e:
-        print(e)
+        print("TC", e)
         updateStatus("tech_crunch", False)
         return
 
@@ -560,7 +570,7 @@ async def fetch_tech_crunch():
 
             collection.insert_one(article)
         except Exception as e:
-            print(e)
+            print("TechCrunch", e)
             updateStatus("tech_crunch", False)
             continue
 
@@ -571,7 +581,7 @@ async def fetch_tech_crunch_connie():
     try:
         feed = feedparser.parse(url)
     except Exception as e:
-        print(e)
+        print("TechCrunch Connie", e)
         updateStatus("tech_crunch_connie", False)
         return
 
@@ -603,7 +613,7 @@ async def fetch_tech_crunch_connie():
             }
             collection.insert_one(article)
         except Exception as e:
-            print(e)
+            print("TechCrunch Connie", e)
             updateStatus("tech_crunch_connie", False)
             continue
 
@@ -613,7 +623,8 @@ async def fetch_fortune():
     updateStatus("fortune", True)
     try:
         feed = feedparser.parse(url)
-    except:
+    except Exception as e:
+        print("Fortune Error", e)
         updateStatus("fortune", False)
         return
 
@@ -639,7 +650,8 @@ async def fetch_fortune():
                 **get_news_types(title),
             }
             collection.insert_one(article)
-        except:
+        except Exception as e:
+            print("Fortune Error", e)
             updateStatus("fortune", False)
             continue
 
@@ -680,7 +692,8 @@ async def fetch_verge():
     for tag, url in url:
         try:
             feed = feedparser.parse(url)
-        except:
+        except Exception as e:
+            print("Verge Error", e)
             updateStatus("verge", False)
             continue
 
@@ -707,7 +720,8 @@ async def fetch_verge():
                     **get_news_types(title),
                 }
                 collection.insert_one(article)
-            except:
+            except Exception as e:
+                print("Verge Error", e)
                 updateStatus("verge", False)
                 continue
 
@@ -717,7 +731,8 @@ async def fetch_bloomberg():
     updateStatus("bloomberg", True)
     try:
         feed = feedparser.parse(url)
-    except:
+    except Exception as e:
+        print("Bloomberg Error", e)
         updateStatus("bloomberg", False)
         return
 
@@ -742,7 +757,8 @@ async def fetch_bloomberg():
                 **get_news_types(title),
             }
             collection.insert_one(article)
-        except:
+        except Exception as e:
+            print("Bloomberg Error", e)
             updateStatus("bloomberg", False)
             continue
 
@@ -752,7 +768,8 @@ async def fetch_insider():
     updateStatus("insider", True)
     try:
         feed = feedparser.parse(url)
-    except:
+    except Exception as e:
+        print("Business Insider Error", e)
         updateStatus("insider", False)
         return
 
@@ -777,7 +794,8 @@ async def fetch_insider():
                 **get_news_types(title),
             }
             collection.insert_one(article)
-        except:
+        except Exception as e:
+            print("Business Insider Error", e)
             updateStatus("insider", False)
             continue
 
@@ -818,7 +836,8 @@ async def fetch_semafor():
                     **get_news_types(title),
                 }
                 collection.insert_one(article)
-        except:
+        except Exception as e:
+            print("Semafor Error", e)
             updateStatus("semafor", False)
             continue
 
@@ -887,7 +906,8 @@ async def fetch_strictly_vc():
                     collection.insert_one(article)
 
             server.expunge()
-    except:
+    except Exception as e:
+        print("Strictly VC Error", e)
         updateStatus("strictly_vc", False)
         return
     # Close the connection to the Gmail IMAP server
@@ -959,7 +979,8 @@ async def fetch_term_sheet():
                     collection.insert_one(article)
 
             server.expunge()
-    except:
+    except Exception as e:
+        print("TermSheet Error", e)
         updateStatus("termsheet", False)
         return
     # Close the connection to the Gmail IMAP server
