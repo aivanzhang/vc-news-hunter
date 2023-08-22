@@ -17,6 +17,7 @@ const newsSchema = new mongoose.Schema({
   Sports: Number,
   Business: Number,
   "Sci/Tech": Number,
+  hidden: Boolean,
 });
 
 const onlineSchema = new mongoose.Schema({
@@ -106,6 +107,7 @@ app.post("/get", (req, res) => {
       dateRangeQuery["Business"] = { $gte: businessMetric };
     }
   }
+  dateRangeQuery["hidden"] = { $ne: true };
 
   newsSourceCollection
     .find(dateRangeQuery)
@@ -138,6 +140,21 @@ app.post("/getStatuses", (req, res) => {
     .catch((err) => {
       console.error(err);
       res.status(500).json({ message: "Error retrieving statuses" });
+    });
+});
+
+app.post("/hide", (req, res) => {
+  const { articleId } = req.body;
+  const newsSourceCollection = mongoose.model("articles", newsSchema);
+
+  newsSourceCollection
+    .updateOne({ _id: articleId }, { hidden: true })
+    .then(() => {
+      res.status(200).json({ message: "Successfully updated" });
+    })
+    .catch((err) => {
+      console.error(err);
+      res.status(500).json({ message: "Error updating document" });
     });
 });
 

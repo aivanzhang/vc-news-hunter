@@ -12,7 +12,7 @@ import {
 } from "@chakra-ui/react";
 import { useEffect, useState } from "react";
 import axios from "axios";
-import { IoIosCopy } from "react-icons/io";
+import { IoIosCopy, IoMdThumbsDown } from "react-icons/io";
 import Layout from "../components/Layout";
 import SidePanel from "../components/SidePanel";
 import Filters from "../components/Filters";
@@ -42,6 +42,7 @@ const Dashboard = () => {
   const [types, setTypes] = useState(new Set(["Startup"]));
   const [sciTechMetric, setSciTechMetric] = useState(0.5);
   const [businessMetric, setBusinessMetric] = useState(0.25);
+  const [hiddenArticles, setHiddenArticles] = useState(new Set());
 
   const fetchNews = async () => {
     if (isLoading) return; // Prevent multiple simultaneous requests
@@ -101,6 +102,19 @@ const Dashboard = () => {
       setSciTechMetric(value / 100);
     } else if (type === "Business") {
       setBusinessMetric(value / 100);
+    }
+  };
+
+  const onHideArticle = async (article) => {
+    const newHiddenArticles = new Set(hiddenArticles);
+    newHiddenArticles.add(article.title);
+    setHiddenArticles(newHiddenArticles);
+    try {
+      await axios.post("/hide", {
+        articleId: article._id,
+      });
+    } catch (error) {
+      console.error("Error hiding news:", error);
     }
   };
 
@@ -179,79 +193,105 @@ const Dashboard = () => {
               No articles found
             </Text>
           )}
-          {news.map((item, index) => (
-            <VStack
-              key={index}
-              borderRadius="md"
-              shadow="md"
-              p={4}
-              spacing={1}
-              w="full"
-              alignItems="flex-start"
-              cursor="pointer"
-              onClick={() => window.open(item.link, "_blank")}
-            >
-              <HStack
-                justifyContent="space-between"
-                alignItems="center"
-                w="full"
-              >
-                <VStack spacing={1} w="full" alignItems="flex-start">
-                  <Text size="md" color="gray">
-                    {sources[item.outlet]}
-                  </Text>
-                  <Heading as="h3" size="md">
-                    {item.title}
-                  </Heading>
-                </VStack>
-                <IconButton
-                  icon={<IoIosCopy />}
-                  variant="ghost"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    navigator.clipboard.writeText(item.title);
-                    toast("Copied title to clipboard!", {
-                      position: "top-right",
-                      autoClose: 5000,
-                      hideProgressBar: false,
-                      closeOnClick: true,
-                      progress: undefined,
-                      theme: "light",
-                    });
-                  }}
-                />
-              </HStack>
-              <Text>{item.description}</Text>
-              <HStack alignItems="center" w="full">
-                <Text fontSize="sm">
-                  {item.authors.length > 0 && (
-                    <>
-                      <strong>{item.authors.join(", ")}</strong> •{" "}
-                    </>
-                  )}
-                  {new Date(item.pub_date).toLocaleString()}
-                </Text>
-                <Spacer />
-                {types.has("Startup") &&
-                  item["Sci/Tech"] > sciTechMetric &&
-                  item["Business"] > businessMetric && (
-                    <Badge colorScheme="primary" rounded="md" variant="solid">
-                      Startup
-                    </Badge>
-                  )}
-                {getSortedCategories(item).map((category, index) => (
-                  <Badge
-                    key={index}
-                    colorScheme="primary"
-                    rounded="md"
-                    variant={category === item["type"] ? "solid" : "outline"}
+          {news.map(
+            (item, index) =>
+              !hiddenArticles.has(item.title) && (
+                <VStack
+                  key={index}
+                  borderRadius="md"
+                  shadow="md"
+                  p={4}
+                  spacing={1}
+                  w="full"
+                  alignItems="flex-start"
+                  cursor="pointer"
+                  onClick={() => window.open(item.link, "_blank")}
+                >
+                  <HStack
+                    justifyContent="space-between"
+                    alignItems="center"
+                    w="full"
                   >
-                    {category}: {item[category].toFixed(2)}
-                  </Badge>
-                ))}
-              </HStack>
-            </VStack>
-          ))}
+                    <VStack spacing={1} w="full" alignItems="flex-start">
+                      <Text size="md" color="gray">
+                        {sources[item.outlet]}
+                      </Text>
+                      <Heading as="h3" size="md">
+                        {item.title}
+                      </Heading>
+                    </VStack>
+                    <IconButton
+                      icon={<IoIosCopy />}
+                      variant="ghost"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        navigator.clipboard.writeText(item.title);
+                        toast("Copied title to clipboard!", {
+                          position: "top-right",
+                          autoClose: 5000,
+                          hideProgressBar: false,
+                          closeOnClick: true,
+                          progress: undefined,
+                          theme: "light",
+                        });
+                      }}
+                    />
+                    <IconButton
+                      icon={<IoMdThumbsDown />}
+                      variant="ghost"
+                      color="red"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        onHideArticle(item);
+                        toast("Feedback noted!", {
+                          position: "top-right",
+                          autoClose: 5000,
+                          hideProgressBar: false,
+                          closeOnClick: true,
+                          progress: undefined,
+                          theme: "light",
+                        });
+                      }}
+                    />
+                  </HStack>
+                  <Text>{item.description}</Text>
+                  <HStack alignItems="center" w="full">
+                    <Text fontSize="sm">
+                      {item.authors.length > 0 && (
+                        <>
+                          <strong>{item.authors.join(", ")}</strong> •{" "}
+                        </>
+                      )}
+                      {new Date(item.pub_date).toLocaleString()}
+                    </Text>
+                    <Spacer />
+                    {types.has("Startup") &&
+                      item["Sci/Tech"] > sciTechMetric &&
+                      item["Business"] > businessMetric && (
+                        <Badge
+                          colorScheme="primary"
+                          rounded="md"
+                          variant="solid"
+                        >
+                          Startup
+                        </Badge>
+                      )}
+                    {getSortedCategories(item).map((category, index) => (
+                      <Badge
+                        key={index}
+                        colorScheme="primary"
+                        rounded="md"
+                        variant={
+                          category === item["type"] ? "solid" : "outline"
+                        }
+                      >
+                        {category}: {item[category].toFixed(2)}
+                      </Badge>
+                    ))}
+                  </HStack>
+                </VStack>
+              )
+          )}
         </VStack>
       </HStack>
     </Layout>
