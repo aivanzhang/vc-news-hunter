@@ -47,19 +47,15 @@ const Dashboard = () => {
     if (isLoading) return; // Prevent multiple simultaneous requests
     setIsLoading(true);
     try {
-      const response = await axios.post(
-        "https://dd30-54-211-253-213.ngrok-free.app/get",
-        // "http://localhost:3000/get",
-        {
-          selectedSources: Array.from(selectedSources),
-          page,
-          dateRange,
-          sortOption,
-          types: types.has("All") ? ["All"] : ["Startup"],
-          sciTechMetric,
-          businessMetric,
-        }
-      );
+      const response = await axios.post("/get", {
+        selectedSources: Array.from(selectedSources),
+        page,
+        dateRange,
+        sortOption,
+        types: types.has("All") ? ["All"] : ["Startup"],
+        sciTechMetric,
+        businessMetric,
+      });
       const fetchedNews = response.data;
       const newNews = [...news, ...fetchedNews.articles];
       setNews(newNews);
@@ -75,19 +71,15 @@ const Dashboard = () => {
     setIsLoading(true);
     // console.log(types);
     try {
-      const response = await axios.post(
-        "https://dd30-54-211-253-213.ngrok-free.app/get",
-        // "http://localhost:3000/get",
-        {
-          selectedSources: Array.from(selectedSources),
-          page: 1,
-          dateRange,
-          sortOption,
-          types: types.has("All") ? ["All"] : ["Startup"],
-          sciTechMetric,
-          businessMetric,
-        }
-      );
+      const response = await axios.post("/get", {
+        selectedSources: Array.from(selectedSources),
+        page: 1,
+        dateRange,
+        sortOption,
+        types: types.has("All") ? ["All"] : ["Startup"],
+        sciTechMetric,
+        businessMetric,
+      });
       const fetchedNews = response.data;
       setNews(fetchedNews.articles);
       setPage(2);
