@@ -131,6 +131,30 @@ app.post("/get", (req, res) => {
     });
 });
 
+app.post("/top", (req, res) => {
+  // Get data from the request body
+  const { daysOld, numArticles } = req.body;
+  const newsSourceCollection = mongoose.model("articles", newsSchema);
+  let dateRangeQuery = {};
+  dateRangeQuery["pub_date"] = {
+    $gte: new Date(new Date().getTime() - daysOld * 24 * 60 * 60 * 1000),
+  };
+  dateRangeQuery["Sci/Tech"] = { $gte: 0.5 };
+  dateRangeQuery["Business"] = { $gte: 0.2 };
+  dateRangeQuery["hidden"] = { $ne: true };
+  newsSourceCollection
+    .find(dateRangeQuery)
+    .sort({ pub_date: -1 })
+    .limit(numArticles)
+    .then((docs) => {
+      res.status(200).json({ articles: docs });
+    })
+    .catch((err) => {
+      console.error(err);
+      res.status(500).json({ message: "Error retrieving documents" });
+    });
+});
+
 app.post("/getStatuses", (req, res) => {
   const onlineCollection = mongoose.model("onlines", onlineSchema);
 

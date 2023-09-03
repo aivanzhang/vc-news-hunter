@@ -5,6 +5,7 @@ import theme from "./theme";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import "react-datepicker/dist/react-datepicker.css";
+import TopNews from "./screens/TopNews";
 
 function App() {
   return (
@@ -13,6 +14,7 @@ function App() {
         <ToastContainer />
         <Routes>
           <Route path="/" element={<Dashboard />} />
+          <Route path="/top_news" element={<TopNews />} />
         </Routes>
       </BrowserRouter>
     </ChakraProvider>

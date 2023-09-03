@@ -1,5 +1,13 @@
 import React from "react";
-import { Box, Heading } from "@chakra-ui/react";
+import {
+  Box,
+  Button,
+  HStack,
+  Heading,
+  Link,
+  Spacer,
+  VStack,
+} from "@chakra-ui/react";
 import { useNavigate } from "react-router-dom";
 
 function Layout({ children, backButton }) {
@@ -8,16 +16,26 @@ function Layout({ children, backButton }) {
     <Box p="4">
       <header></header>
       <main>
-        <Heading
-          as="h1"
-          size="xl"
-          color="primary.500"
-          onClick={() => navigate("/")}
-          cursor="pointer"
-        >
-          VC News
-        </Heading>
-        <a href="mailto:ivanzhangofficial@gmail.com">Contact</a>
+        <HStack>
+          <VStack>
+            <Heading
+              as="h1"
+              size="xl"
+              color="primary.500"
+              onClick={() => navigate("/")}
+              cursor="pointer"
+            >
+              VC News
+            </Heading>
+            <Link href="mailto:ivanzhangofficial@gmail.com" w="full">
+              Contact
+            </Link>
+          </VStack>
+          <Spacer />
+          <Button colorScheme="primary" onClick={() => navigate("/top_news")}>
+            Top News Articles (Beta)
+          </Button>
+        </HStack>
         <Box h="2" />
         {children}
       </main>
