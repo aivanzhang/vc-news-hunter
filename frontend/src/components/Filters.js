@@ -12,6 +12,7 @@ import {
   SliderTrack,
   SliderFilledTrack,
   SliderThumb,
+  Button,
 } from "@chakra-ui/react";
 import { forwardRef, useState } from "react";
 import DatePicker from "react-datepicker";
@@ -39,15 +40,9 @@ const Filters = ({
   onChangeTypes = () => {},
   onSliderChangeEnd = () => {},
 }) => {
-  // const [selectedOption, setSelectedOption] = useState("");
   const [businessSliderValue, setBusinessSliderValue] = useState(25);
   const [sciTechSliderValue, setSciTechSliderValue] = useState(50);
-
-  // const handleSelectSort = (event) => {
-  //   const option = event.target.value;
-  //   setSelectedOption(option);
-  //   onSelectSort(option);
-  // };
+  const [showSliders, toggleSliders] = useState(false);
 
   return (
     <VStack
@@ -97,11 +92,19 @@ const Filters = ({
         </Wrap>
       </CheckboxGroup>
       {types.has("Startup") && (
-        <Text fontWeight="bold" w="full">
-          Startup Tuning
-        </Text>
+        <HStack spacing={3}>
+          <Text fontWeight="bold" w="full">
+            Startup Tuning
+          </Text>
+          <Button
+            onClick={() => toggleSliders((prev) => !prev)}
+            variant="outline"
+          >
+            {showSliders ? "Hide" : "Show"}
+          </Button>
+        </HStack>
       )}
-      {types.has("Startup") && (
+      {types.has("Startup") && showSliders && (
         <VStack w="full">
           <Text w="full">Business: {businessSliderValue / 100}</Text>
           <Slider
