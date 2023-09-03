@@ -132,8 +132,12 @@ const Dashboard = () => {
     types,
     sciTechMetric,
     businessMetric,
-    news,
   ]);
+
+  useEffect(() => {
+    fetchNewNews();
+    //eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [names]);
 
   return (
     <Layout>

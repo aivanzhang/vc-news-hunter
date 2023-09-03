@@ -17,6 +17,7 @@ function Layout({ children, backButton }) {
         >
           VC News
         </Heading>
+        <a href="mailto:ivanzhangofficial@gmail.com">Contact</a>
         <Box h="2" />
         {children}
       </main>
