@@ -55,17 +55,17 @@ app.use(function (req, res, next) {
 
 function convertSources(selectedSources) {
   const sources = [];
-
   selectedSources.forEach((source) => {
     if (authors[source]) {
       sources.push({
         outlet: authors[source].outlet,
         authors: authors[source].author,
       });
+    } else {
+      sources.push({
+        outlet: source,
+      });
     }
-    sources.push({
-      outlet: source,
-    });
   });
   return sources;
 }
@@ -81,6 +81,7 @@ app.post("/get", (req, res) => {
     types,
     sciTechMetric,
     businessMetric,
+    names,
   } = req.body;
   const new_types = types.filter((type) => type !== "Startup");
   const limit = 10;
@@ -109,9 +110,15 @@ app.post("/get", (req, res) => {
   }
   dateRangeQuery["hidden"] = { $ne: true };
 
-  newsSourceCollection
-    .find(dateRangeQuery)
-    .or(convertSources(selectedSources))
+  (names.length > 0
+    ? newsSourceCollection.find({
+        ...dateRangeQuery,
+        authors: { $in: names },
+      })
+    : newsSourceCollection
+        .find(dateRangeQuery)
+        .or(convertSources(selectedSources))
+  )
     .sort(sortOption === "most_recent" ? { pub_date: -1 } : {})
     .skip((page - 1) * limit)
     .limit(limit)

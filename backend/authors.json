@@ -6,5 +6,9 @@
   "axios-dan_primack": {
     "outlet": "axios",
     "author": "Dan Primack"
+  },
+  "tech_crunch_connie": {
+    "outlet": "tech_crunch",
+    "author": "Connie Loizos"
   }
 }

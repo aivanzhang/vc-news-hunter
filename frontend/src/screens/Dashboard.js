@@ -43,6 +43,7 @@ const Dashboard = () => {
   const [sciTechMetric, setSciTechMetric] = useState(0.5);
   const [businessMetric, setBusinessMetric] = useState(0.25);
   const [hiddenArticles, setHiddenArticles] = useState(new Set());
+  const [names, setNames] = useState([]);
 
   const fetchNews = async () => {
     if (isLoading) return; // Prevent multiple simultaneous requests
@@ -56,6 +57,7 @@ const Dashboard = () => {
         types: types.has("All") ? ["All"] : ["Startup"],
         sciTechMetric,
         businessMetric,
+        names,
       });
       const fetchedNews = response.data;
       const newNews = [...news, ...fetchedNews.articles];
@@ -80,6 +82,7 @@ const Dashboard = () => {
         types: types.has("All") ? ["All"] : ["Startup"],
         sciTechMetric,
         businessMetric,
+        names,
       });
       const fetchedNews = response.data;
       setNews(fetchedNews.articles);
@@ -129,6 +132,7 @@ const Dashboard = () => {
     types,
     sciTechMetric,
     businessMetric,
+    news,
   ]);
 
   return (
@@ -155,6 +159,8 @@ const Dashboard = () => {
               setTypes(newTypes);
             }}
             onSliderChangeEnd={onFinishSettingStartupValue}
+            names={names}
+            setNames={setNames}
           />
           <ButtonGroup gap="2" justifyContent="flex-start" w="full">
             <Button

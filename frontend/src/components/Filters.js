@@ -16,8 +16,8 @@ import {
 } from "@chakra-ui/react";
 import { forwardRef, useState } from "react";
 import DatePicker from "react-datepicker";
+import AuthorsModal from "./AuthorsModal";
 
-const defaultSortOptions = [{ value: "most_recent", label: "Most Recent" }];
 const newsTypes = ["All", "Startup"];
 const DatePickerInput = forwardRef(
   ({ value, onClick, className, ...props }, ref) => (
@@ -32,16 +32,17 @@ const DatePickerInput = forwardRef(
 );
 
 const Filters = ({
-  sortOptions = defaultSortOptions,
-  onSelectSort = () => {},
   dateRange,
   setDateRange,
   types,
   onChangeTypes = () => {},
   onSliderChangeEnd = () => {},
+  names,
+  setNames,
 }) => {
   const [businessSliderValue, setBusinessSliderValue] = useState(25);
   const [sciTechSliderValue, setSciTechSliderValue] = useState(50);
+  const [rankByAuthors, toggleRankByAuthors] = useState(false);
   const [showSliders, toggleSliders] = useState(false);
 
   return (
@@ -54,6 +55,12 @@ const Filters = ({
       w="full"
       alignItems="flex-start"
     >
+      <AuthorsModal
+        isOpen={rankByAuthors}
+        setIsOpen={toggleRankByAuthors}
+        names={names}
+        setNames={setNames}
+      />
       <Text fontWeight="bold">Date Range</Text>
       <HStack spacing={2} w="full" alignItems="center">
         <DatePicker
@@ -99,6 +106,7 @@ const Filters = ({
           <Button
             onClick={() => toggleSliders((prev) => !prev)}
             variant="outline"
+            colorScheme="primary"
           >
             {showSliders ? "Hide" : "Show"}
           </Button>
@@ -134,6 +142,13 @@ const Filters = ({
           </Slider>
         </VStack>
       )}
+      <Button
+        onClick={() => toggleRankByAuthors((prev) => !prev)}
+        variant={names.length > 0 ? "solid" : "outline"}
+        colorScheme="primary"
+      >
+        Filter By Authors ({names.length})
+      </Button>
       <Divider borderColor="black" />
     </VStack>
   );
