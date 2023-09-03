@@ -34,7 +34,7 @@ const TopNews = () => {
   const [news, setNews] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
   const [hiddenArticles, setHiddenArticles] = useState(new Set());
-  const [daysOld, setDaysOld] = useState(1);
+  const [daysOld, setDaysOld] = useState(7);
   const [numArticles, setNumArticles] = useState(10);
 
   const getTop = async () => {
