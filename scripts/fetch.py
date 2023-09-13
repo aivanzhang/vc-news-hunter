@@ -389,7 +389,8 @@ async def fetch_information():
                 "description": get_description(description),
                 "pub_date": pub_date,
                 "outlet": "information",
-                **get_news_types(title),
+                "Business": 1,
+                "Sci/Tech": 1,
             }
             collection.insert_one(article)
         except Exception as e:
