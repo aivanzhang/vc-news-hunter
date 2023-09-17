@@ -16,7 +16,7 @@ twitter = TweeterPy()
 config.PROXY = {"http": "127.0.0.1", "https": "127.0.0.1"}
 config.TIMEOUT = 10
 try:
-    twitter.load_session()
+    twitter.load_session("tester89257")
 except:
     twitter.login("tester89257", "ivan1234")
     twitter.save_session()
@@ -37,7 +37,10 @@ def get_tweet_info(article_url):
         user_details = res["core"]["user_results"]["result"]["legacy"]
         views = 0
         if "views" in res and "count" in res["views"]:
-            views = res["views"]["count"]
+            try:
+                views = int(res["views"]["count"])
+            except:
+                views = 0
         t_info = {
             "views": views,
             "bookmark_count": details["bookmark_count"],
