@@ -33,7 +33,10 @@ def get_tweet_info(article_url):
     for content in search_res["data"]:
         icontent = content["content"]["itemContent"]
         res = icontent["tweet_results"]["result"]
+        if "legacy" not in res:
+            res = res["tweet"]
         details = res["legacy"]
+
         user_details = res["core"]["user_results"]["result"]["legacy"]
         views = 0
         if "views" in res and "count" in res["views"]:
