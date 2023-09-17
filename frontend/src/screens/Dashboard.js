@@ -12,12 +12,13 @@ import {
 } from "@chakra-ui/react";
 import { useEffect, useState } from "react";
 import axios from "axios";
-import { IoIosCopy, IoMdThumbsDown } from "react-icons/io";
+import { IoIosCopy, IoMdThumbsDown, IoLogoTwitter } from "react-icons/io";
 import Layout from "../components/Layout";
 import SidePanel from "../components/SidePanel";
 import Filters from "../components/Filters";
 import { toast } from "react-toastify";
 import sources from "../sources.json";
+import TweetModal from "../components/TwitterModal";
 
 const CATEGORIES = ["World", "Sports", "Business", "Sci/Tech", "Misc"];
 
@@ -44,6 +45,9 @@ const Dashboard = () => {
   const [businessMetric, setBusinessMetric] = useState(0.25);
   const [hiddenArticles, setHiddenArticles] = useState(new Set());
   const [names, setNames] = useState([]);
+  const [isOpen, setIsOpen] = useState(false);
+  const [tweets, setTweets] = useState(null);
+  const [tweetsSummary, setTweetsSummary] = useState(null);
 
   const fetchNews = async () => {
     if (isLoading) return; // Prevent multiple simultaneous requests
@@ -141,6 +145,13 @@ const Dashboard = () => {
 
   return (
     <Layout>
+      <TweetModal
+        isOpen={isOpen}
+        setIsOpen={setIsOpen}
+        onClose={() => setIsOpen(false)}
+        tweets={tweets}
+        tweets_summary={tweetsSummary}
+      />
       <HStack
         spacing={4}
         display="flex"
@@ -230,6 +241,23 @@ const Dashboard = () => {
                         {item.title}
                       </Heading>
                     </VStack>
+                    {item.tweets && (
+                      <Button
+                        p="2"
+                        leftIcon={<IoLogoTwitter />}
+                        colorScheme="blue"
+                        size="twitter"
+                        variant="solid"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setTweetsSummary(item.tweets_summary);
+                          setTweets(item.tweets);
+                          setIsOpen(true);
+                        }}
+                      >
+                        Stats
+                      </Button>
+                    )}
                     <IconButton
                       icon={<IoIosCopy />}
                       variant="ghost"
