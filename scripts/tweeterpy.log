@@ -1,0 +1,25 @@
+2023-09-17 14:40:06,047 [DEBUG] [Line No. 20] tweeterpy.request_util : make_request :: {'url': 'https://www.twitter.com/', 'session': <requests.sessions.Session object at 0x1059e2590>, 'method': 'GET', 'max_retries': 3, 'timeout': 5, 'skip_error_checking': False, 'kwargs': {}}
+2023-09-17 14:40:06,079 [DEBUG] [Line No. 1048] urllib3.connectionpool : _new_conn :: Starting new HTTPS connection (1): www.twitter.com:443
+2023-09-17 14:40:06,259 [DEBUG] [Line No. 546] urllib3.connectionpool : _make_request :: https://www.twitter.com:443 "GET / HTTP/1.1" 301 0
+2023-09-17 14:40:06,264 [DEBUG] [Line No. 1048] urllib3.connectionpool : _new_conn :: Starting new HTTPS connection (1): twitter.com:443
+2023-09-17 14:40:06,411 [DEBUG] [Line No. 546] urllib3.connectionpool : _make_request :: https://twitter.com:443 "GET / HTTP/1.1" 302 49
+2023-09-17 14:40:06,484 [DEBUG] [Line No. 546] urllib3.connectionpool : _make_request :: https://twitter.com:443 "GET / HTTP/1.1" 200 None
+2023-09-17 14:40:06,592 [DEBUG] [Line No. 20] tweeterpy.request_util : make_request :: {'url': 'https://api.twitter.com/1.1/guest/activate.json', 'session': <requests.sessions.Session object at 0x1059e2590>, 'method': 'POST', 'max_retries': 3, 'timeout': 5, 'skip_error_checking': False, 'kwargs': {}}
+2023-09-17 14:40:06,628 [DEBUG] [Line No. 1048] urllib3.connectionpool : _new_conn :: Starting new HTTPS connection (1): api.twitter.com:443
+2023-09-17 14:40:06,800 [DEBUG] [Line No. 546] urllib3.connectionpool : _make_request :: https://api.twitter.com:443 "POST /1.1/guest/activate.json HTTP/1.1" 200 63
+2023-09-17 14:40:06,808 [DEBUG] [Line No. 437] charset_normalizer : from_bytes :: Encoding detection: ascii is most likely the one.
+2023-09-17 14:40:06,809 [DEBUG] [Line No. 28] tweeterpy.api_util : __init__ :: Updating API...
+2023-09-17 14:40:06,809 [DEBUG] [Line No. 20] tweeterpy.request_util : make_request :: {'url': 'https://www.twitter.com/', 'session': <requests.sessions.Session object at 0x1059e2590>, 'method': 'GET', 'max_retries': 3, 'timeout': 5, 'skip_error_checking': False, 'kwargs': {}}
+2023-09-17 14:40:06,850 [DEBUG] [Line No. 546] urllib3.connectionpool : _make_request :: https://www.twitter.com:443 "GET / HTTP/1.1" 301 0
+2023-09-17 14:40:06,910 [DEBUG] [Line No. 546] urllib3.connectionpool : _make_request :: https://twitter.com:443 "GET / HTTP/1.1" 200 None
+2023-09-17 14:40:06,972 [DEBUG] [Line No. 59] tweeterpy.api_util : _get_api_file_url :: API Url => https://abs.twimg.com/responsive-web/client-web/api.eed7afaa.js
+2023-09-17 14:40:06,977 [DEBUG] [Line No. 20] tweeterpy.request_util : make_request :: {'url': 'https://abs.twimg.com/responsive-web/client-web/api.eed7afaa.js', 'session': <requests.sessions.Session object at 0x1059e2590>, 'method': 'GET', 'max_retries': 3, 'timeout': 5, 'skip_error_checking': False, 'kwargs': {}}
+2023-09-17 14:40:07,007 [DEBUG] [Line No. 1048] urllib3.connectionpool : _new_conn :: Starting new HTTPS connection (1): abs.twimg.com:443
+2023-09-17 14:40:07,124 [DEBUG] [Line No. 546] urllib3.connectionpool : _make_request :: https://abs.twimg.com:443 "GET /responsive-web/client-web/api.eed7afaa.js HTTP/1.1" 200 57457
+2023-09-17 14:40:07,149 [DEBUG] [Line No. 437] charset_normalizer : from_bytes :: Encoding detection: ascii is most likely the one.
+2023-09-17 14:40:07,312 [DEBUG] [Line No. 127] tweeterpy.api_util : _save_api_data :: Saving API data to the temp file.
+2023-09-17 14:40:07,317 [DEBUG] [Line No. 130] tweeterpy.api_util : _save_api_data :: API data saved successfully.
+2023-09-17 14:40:07,318 [INFO] [Line No. 44] tweeterpy.api_util : __init__ :: API Updated Successfully.
+2023-09-17 14:40:08,358 [DEBUG] [Line No. 546] urllib3.connectionpool : _make_request :: https://www.twitter.com:443 "GET / HTTP/1.1" 301 0
+2023-09-17 14:40:08,475 [DEBUG] [Line No. 546] urllib3.connectionpool : _make_request :: https://twitter.com:443 "GET / HTTP/1.1" 200 None
+2023-09-17 14:40:08,631 [DEBUG] [Line No. 546] urllib3.connectionpool : _make_request :: https://twitter.com:443 "GET /i/api/graphql/qevmDaYaF66EOtboiNoQbQ/Viewer?variables=%7B%22withCommunitiesMemberships%22%3A+true%2C+%22withSubscribedTab%22%3A+true%2C+%22withCommunitiesCreation%22%3A+true%7D&features=%7B%22responsive_web_graphql_exclude_directive_enabled%22%3A+true%2C+%22verified_phone_label_enabled%22%3A+true%2C+%22responsive_web_graphql_skip_user_profile_image_extensions_enabled%22%3A+false%2C+%22responsive_web_graphql_timeline_navigation_enabled%22%3A+true%2C+%22hidden_profile_likes_enabled%22%3A+false%2C+%22highlights_tweets_tab_ui_enabled%22%3A+true%2C+%22creator_subscriptions_tweet_preview_api_enabled%22%3A+true%7D HTTP/1.1" 200 851

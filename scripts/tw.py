@@ -101,7 +101,7 @@ def update_articles():
         tweets, totals = get_tweet_info(link)
         collection.update_one(
             {"_id": article["_id"]},
-            {"$set": {"tweet": tweets, "tweet_summary": totals}},
+            {"$set": {"tweets": tweets, "tweets_summary": totals}},
             upsert=False,
         )
 
@@ -112,28 +112,28 @@ def update_articles():
 #     schedule.run_pending()
 #     time.sleep(1)
 
-update_articles()
+# update_articles()
 
 
-# articles = collection.find(
-#     {"tweet": {"$exists": True}, "tweet_summary": {"$exists": True}}
-# )
+articles = collection.find(
+    {"tweet": {"$exists": True}, "tweet_summary": {"$exists": True}}
+)
 
-# for article in articles:
-#     collection.update_one(
-#         {"_id": article["_id"]},
-#         {"$rename": {"tweet": "tweets", "tweet_summary": "tweets_summary"}},
-#     )
+for article in articles:
+    collection.update_one(
+        {"_id": article["_id"]},
+        {"$rename": {"tweet": "tweets", "tweet_summary": "tweets_summary"}},
+    )
 
-#     # Convert tweet.views to an integer for each tweet in the tweets array
-#     tweets = [{**tweet, "views": int(tweet["views"])} for tweet in article["tweet"]]
-#     print(tweets)
+    # Convert tweet.views to an integer for each tweet in the tweets array
+    tweets = [{**tweet, "views": int(tweet["views"])} for tweet in article["tweet"]]
+    print(tweets)
 
-#     # Calculate the total views for tweets
-#     total_views = sum(tweet["views"] for tweet in tweets)
+    # Calculate the total views for tweets
+    total_views = sum(tweet["views"] for tweet in tweets)
 
-#     # Then, update the values
-#     collection.update_one(
-#         {"_id": article["_id"]},
-#         {"$set": {"tweets": tweets, "tweets_summary.views": total_views}},
-#     )
+    # Then, update the values
+    collection.update_one(
+        {"_id": article["_id"]},
+        {"$set": {"tweets": tweets, "tweets_summary.views": total_views}},
+    )
