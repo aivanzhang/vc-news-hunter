@@ -35,8 +35,11 @@ def get_tweet_info(article_url):
         res = icontent["tweet_results"]["result"]
         details = res["legacy"]
         user_details = res["core"]["user_results"]["result"]["legacy"]
+        views = 0
+        if "views" in res and "count" in res["views"]:
+            views = res["views"]["count"]
         t_info = {
-            "views": res["views"]["count"],
+            "views": views,
             "bookmark_count": details["bookmark_count"],
             "favorite_count": details["favorite_count"],
             "quote_count": details["quote_count"],
@@ -100,8 +103,10 @@ def update_articles():
         )
 
 
-schedule.every().day.at("00:00").do(update_articles)
+# schedule.every().day.at("00:00").do(update_articles)
 
-while True:
-    schedule.run_pending()
-    time.sleep(1)
+# while True:
+#     schedule.run_pending()
+#     time.sleep(1)
+
+update_articles()
