@@ -4,6 +4,7 @@ import time
 from pymongo import MongoClient
 from pymongo.server_api import ServerApi
 from datetime import datetime, timedelta
+import schedule
 
 uri = "mongodb+srv://ivan:9lhUkeVT3YYGVAzh@cluster0.67lpgjg.mongodb.net/?retryWrites=true&w=majority"
 # Create a new client and connect to the server
@@ -97,3 +98,10 @@ def update_articles():
             {"$set": {"tweet": tweets, "tweet_summary": totals}},
             upsert=False,
         )
+
+
+schedule.every().day.at("00:00").do(update_articles)
+
+while True:
+    schedule.run_pending()
+    time.sleep(1)
