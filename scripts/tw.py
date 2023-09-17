@@ -1,7 +1,7 @@
 from tweeterpy import TweeterPy, config
 import random
 import time
-from pymongo import MongoClient
+from pymongo import MongoClient, DESCENDING
 from pymongo.server_api import ServerApi
 from datetime import datetime, timedelta
 import schedule
@@ -93,7 +93,7 @@ def update_articles():
                 {"tweet": {"$exists": False}},
             ]
         }
-    )
+    ).sort("pub_date", DESCENDING)
 
     for article in results:
         link = article["link"]
@@ -106,13 +106,13 @@ def update_articles():
         )
 
 
-schedule.every().day.at("00:00").do(update_articles)
+# schedule.every().day.at("00:00").do(update_articles)
 
-while True:
-    schedule.run_pending()
-    time.sleep(1)
+# while True:
+#     schedule.run_pending()
+#     time.sleep(1)
 
-# update_articles()
+update_articles()
 
 
 # articles = collection.find(
