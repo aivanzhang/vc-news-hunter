@@ -85,7 +85,7 @@ def update_articles():
             "$and": [
                 {
                     "$or": [
-                        {"outlet": {"$in": ["tech_crunch", "information", "wsj"]}},
+                        {"outlet": {"$in": ["tech_crunch", "information"]}},
                         {"authors": "Dan Primack"},
                     ]
                 },
@@ -106,13 +106,13 @@ def update_articles():
         )
 
 
-# schedule.every().day.at("00:00").do(update_articles)
+schedule.every().day.at("00:00").do(update_articles)
 
-# while True:
-#     schedule.run_pending()
-#     time.sleep(1)
+while True:
+    schedule.run_pending()
+    time.sleep(1)
 
-update_articles()
+# update_articles()
 
 
 # articles = collection.find(
