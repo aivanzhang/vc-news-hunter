@@ -27,9 +27,7 @@ def get_tweet_info(article_url):
     rate_limit = search_res["api_rate_limit"]
     if rate_limit["rate_limit_exhausted"]:
         sleep_time = rate_limit["reset_after_datetime_object"].total_seconds() + 300
-        print(f"Sleeping for {sleep_time} seconds")
         time.sleep(sleep_time)
-        return "SLEPT"
     article_tweets = []
     for content in search_res["data"]:
         icontent = content["content"]["itemContent"]
@@ -84,33 +82,34 @@ def get_tweet_info(article_url):
 
 
 def update_articles():
-    results = collection.find(
-        {
-            "$and": [
-                {
-                    "$or": [
-                        {"outlet": {"$in": ["tech_crunch", "information"]}},
-                        {"authors": "Dan Primack"},
-                    ]
-                },
-                {"pub_date": {"$lt": datetime.now() - timedelta(days=1)}},
-                {"tweet": {"$exists": False}},
-            ]
-        }
-    ).sort("pub_date", DESCENDING)
+    try:
+        results = collection.find(
+            {
+                "$and": [
+                    {
+                        "$or": [
+                            {"outlet": {"$in": ["tech_crunch", "information"]}},
+                            {"authors": "Dan Primack"},
+                        ]
+                    },
+                    {"pub_date": {"$lt": datetime.now() - timedelta(days=1)}},
+                    {"tweet": {"$exists": False}},
+                ]
+            }
+        ).sort("pub_date", DESCENDING)
 
-    for article in results:
-        link = article["link"]
-        print(f"Getting tweets for {link}")
-        tweets_res = get_tweet_info(link)
-        if tweets_res == "SLEPT":
-            return
-        tweets, totals = tweets_res
-        collection.update_one(
-            {"_id": article["_id"]},
-            {"$set": {"tweets": tweets, "tweets_summary": totals}},
-            upsert=False,
-        )
+        for article in results:
+            link = article["link"]
+            print(f"Getting tweets for {link}")
+            tweets, totals = get_tweet_info(link)
+            collection.update_one(
+                {"_id": article["_id"]},
+                {"$set": {"tweets": tweets, "tweets_summary": totals}},
+                upsert=False,
+            )
+    except Exception as e:
+        print(e)
+        return
 
 
 schedule.every(21).minutes.do(update_articles)
