@@ -1,6 +1,7 @@
 import {
   Badge,
   Box,
+  Checkbox,
   HStack,
   Heading,
   IconButton,
@@ -11,6 +12,7 @@ import {
   Spacer,
   Text,
   VStack,
+  Wrap,
 } from "@chakra-ui/react";
 import { useEffect, useState } from "react";
 import axios from "axios";
@@ -18,6 +20,7 @@ import { IoIosCopy, IoMdThumbsDown } from "react-icons/io";
 import Layout from "../components/Layout";
 import { toast } from "react-toastify";
 import sources from "../sources.json";
+import TwitterInsights from "../components/TwitterInsights";
 
 const CATEGORIES = ["World", "Sports", "Business", "Sci/Tech", "Misc"];
 
@@ -36,15 +39,16 @@ const TopNews = () => {
   const [hiddenArticles, setHiddenArticles] = useState(new Set());
   const [daysOld, setDaysOld] = useState(7);
   const [numArticles, setNumArticles] = useState(10);
+  const [sortByTwitter, setSortByTwitter] = useState(true);
 
   const getTop = async () => {
     if (isLoading) return; // Prevent multiple simultaneous requests
     setIsLoading(true);
-    // console.log(types);
     try {
       const response = await axios.post("/top", {
         daysOld,
         numArticles,
+        sortByTwitter,
       });
       const fetchedNews = response.data;
       setNews(fetchedNews.articles);
@@ -70,7 +74,7 @@ const TopNews = () => {
   useEffect(() => {
     getTop();
     //eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [daysOld, numArticles]);
+  }, [daysOld, numArticles, sortByTwitter]);
 
   const handleDaysChangeEnd = (value) => {
     if (value < 2) {
@@ -81,7 +85,6 @@ const TopNews = () => {
       setDaysOld(7);
     }
   };
-
   return (
     <Layout>
       <HStack
@@ -131,6 +134,17 @@ const TopNews = () => {
                 </Slider>
               </Box>
             </HStack>
+            <HStack w="100%" spacing={20}>
+              <Wrap spacing={3}>
+                <Checkbox
+                  isChecked={sortByTwitter}
+                  colorScheme="primary"
+                  onChange={() => setSortByTwitter((prev) => !prev)}
+                >
+                  Sort by Twitter Popularity
+                </Checkbox>
+              </Wrap>
+            </HStack>
           </Box>
           {news.length === 0 && (
             <Text fontSize="lg" color="gray">
@@ -164,6 +178,12 @@ const TopNews = () => {
                         {item.title}
                       </Heading>
                     </VStack>
+                    {item.tweets && (
+                      <TwitterInsights
+                        tweetsArray={item.tweets}
+                        tweets_summary={item.tweets_summary}
+                      />
+                    )}
                     <IconButton
                       icon={<IoIosCopy />}
                       variant="ghost"
