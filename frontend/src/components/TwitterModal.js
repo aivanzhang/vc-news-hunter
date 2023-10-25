@@ -24,7 +24,7 @@ function TweetModal({ isOpen, onClose, tweets, tweets_summary }) {
       <ModalContent>
         <ModalHeader>Tweets</ModalHeader>
         <ModalCloseButton />
-        <ModalBody maxH="2xl" overflow="scroll">
+        <ModalBody maxH="xl" overflow="scroll">
           <Box my={4} p={4} bg="gray.100" borderRadius="md">
             <Text fontWeight="bold" mb={2}>
               Totals

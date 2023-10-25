@@ -18,9 +18,9 @@ export default function TwitterInsights({ tweetsArray, tweets_summary }) {
       />
       <Button
         p="2"
+        px="4"
         leftIcon={<IoLogoTwitter />}
         colorScheme="blue"
-        size="twitter"
         variant="solid"
         onClick={(e) => {
           e.stopPropagation();

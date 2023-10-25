@@ -1,6 +1,7 @@
 import {
   Badge,
   Box,
+  Button,
   Checkbox,
   HStack,
   Heading,
@@ -17,10 +18,12 @@ import {
 import { useEffect, useState } from "react";
 import axios from "axios";
 import { IoIosCopy, IoMdThumbsDown } from "react-icons/io";
+import { PiNewspaperFill } from "react-icons/pi";
 import Layout from "../components/Layout";
 import { toast } from "react-toastify";
 import sources from "../sources.json";
 import TwitterInsights from "../components/TwitterInsights";
+import GenerateModal from "../components/GenerateModal";
 
 const CATEGORIES = ["World", "Sports", "Business", "Sci/Tech", "Misc"];
 
@@ -36,10 +39,12 @@ function getSortedCategories(article) {
 const TopNews = () => {
   const [news, setNews] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
+  const [isGenerateModalOpen, setIsGenerateModalOpen] = useState(false);
   const [hiddenArticles, setHiddenArticles] = useState(new Set());
   const [daysOld, setDaysOld] = useState(7);
   const [numArticles, setNumArticles] = useState(10);
   const [sortByTwitter, setSortByTwitter] = useState(true);
+  const [newsletterArticles, setNewsletterArticles] = useState(new Set());
 
   const getTop = async () => {
     if (isLoading) return; // Prevent multiple simultaneous requests
@@ -93,8 +98,21 @@ const TopNews = () => {
         flexDir="inline-flex"
         className="h-[89vh] w-full"
       >
+        <GenerateModal
+          isOpen={isGenerateModalOpen}
+          onClose={() => setIsGenerateModalOpen(false)}
+          articles={() => {
+            const articles = [];
+            for (const article of newsletterArticles) {
+              articles.push(
+                news.find((newsArticle) => newsArticle._id === article)
+              );
+            }
+            return articles;
+          }}
+        />
         <VStack spacing={4} p={2} w="full" h="full" overflowY="scroll">
-          <Box w="full">
+          <VStack w="full" spacing={5} alignItems="flex-start">
             <HStack w="30%" spacing={20}>
               {/* Slider for Days Old */}
               <Box className="flex flex-col w-1/2">
@@ -145,7 +163,15 @@ const TopNews = () => {
                 </Checkbox>
               </Wrap>
             </HStack>
-          </Box>
+            {newsletterArticles.size > 0 && (
+              <Button
+                colorScheme="primary"
+                onClick={() => setIsGenerateModalOpen(true)}
+              >
+                Generate Newsletter ({newsletterArticles.size})
+              </Button>
+            )}
+          </VStack>
           {news.length === 0 && (
             <Text fontSize="lg" color="gray">
               No articles found
@@ -178,6 +204,29 @@ const TopNews = () => {
                         {item.title}
                       </Heading>
                     </VStack>
+                    <Button
+                      p="2"
+                      px="4"
+                      leftIcon={<PiNewspaperFill />}
+                      colorScheme="blue"
+                      variant={
+                        newsletterArticles.has(item._id) ? "solid" : "outline"
+                      }
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        const newNewsletterArticles = new Set(
+                          newsletterArticles
+                        );
+                        if (newNewsletterArticles.has(item._id)) {
+                          newNewsletterArticles.delete(item._id);
+                        } else {
+                          newNewsletterArticles.add(item._id);
+                        }
+                        setNewsletterArticles(newNewsletterArticles);
+                      }}
+                    >
+                      Add
+                    </Button>
                     {item.tweets && (
                       <TwitterInsights
                         tweetsArray={item.tweets}
