@@ -23,7 +23,7 @@ except:
 
 
 def get_tweet_info(article_url):
-    search_res = twitter.search(article_url, total=3)
+    search_res = twitter.search(article_url, total=2)
     rate_limit = search_res["api_rate_limit"]
     if rate_limit["rate_limit_exhausted"]:
         sleep_time = rate_limit["reset_after_datetime_object"].total_seconds() + 300
