@@ -227,6 +227,28 @@ app.post("/hide", (req, res) => {
     });
 });
 
+app.post("/generateNewsletter", async (req, res) => {
+  const { articleIds } = req.body;
+
+  const newsSourceCollection = mongoose.model("articles", newsSchema);
+  const articles = await newsSourceCollection.find({
+    _id: { $in: articleIds },
+  });
+  const cleanedArticles = articles.map(
+    ({ title, link, authors, description, pub_date, outlet }) => ({
+      title,
+      link,
+      authors,
+      description,
+      pub_date,
+      outlet,
+    })
+  );
+
+  console.log(cleanedArticles);
+  res.status(200).json({ message: "Successfully generated newsletter" });
+});
+
 // Start the server
 const port = 3000;
 app.listen(port, () => {

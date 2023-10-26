@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import {
   Modal,
   ModalOverlay,
@@ -17,6 +17,7 @@ import {
   Box,
 } from "@chakra-ui/react";
 import sources from "../sources.json";
+import axios from "axios";
 
 const CATEGORIES = ["World", "Sports", "Business", "Sci/Tech", "Misc"];
 
@@ -30,10 +31,24 @@ function getSortedCategories(article) {
 }
 
 function GenerateModal({ isOpen, onClose, articles }) {
+  const [loading, setLoading] = useState(false);
   if (!articles) {
     return null;
   }
   const newsArticles = articles();
+
+  const generateNewsletter = async () => {
+    try {
+      setLoading(true);
+      const response = await axios.post("/generateNewsletter", {
+        articleIds: newsArticles.map((article) => article._id),
+      });
+      const data = response.data;
+    } catch (error) {
+      console.error("Error fetching statuses:", error);
+    }
+    setLoading(false);
+  };
 
   return (
     <Modal isOpen={isOpen} onClose={onClose}>
@@ -95,8 +110,14 @@ function GenerateModal({ isOpen, onClose, articles }) {
           ))}
         </ModalBody>
         <ModalFooter w="full" justifyContent="center" flexDir="column">
-          <Button w="full" disabled={true}>
-            Generate Newsletter (coming soon)
+          <Button
+            w="full"
+            colorScheme="primary"
+            onClick={generateNewsletter}
+            isLoading={loading}
+            loadingText="Generating"
+          >
+            Generate Newsletter
           </Button>
           <Box h="4" />
           <Text textAlign="center">
