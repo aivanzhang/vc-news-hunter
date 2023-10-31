@@ -1,10 +1,11 @@
-from tweeterpy import TweeterPy, config
-import random
 import time
 from pymongo import MongoClient, DESCENDING
 from pymongo.server_api import ServerApi
 from datetime import datetime, timedelta
 import schedule
+from urllib.parse import quote_plus
+from selenium import webdriver
+from selenium.webdriver.common.by import By
 
 uri = "mongodb+srv://ivan:9lhUkeVT3YYGVAzh@cluster0.67lpgjg.mongodb.net/?retryWrites=true&w=majority"
 # Create a new client and connect to the server
@@ -12,40 +13,44 @@ client = MongoClient(uri, server_api=ServerApi("1"))
 db = client["vc_news"]  # Name of the database
 collection = db["articles"]  # Name of the collection
 
-twitter = TweeterPy()
-config.PROXY = {"http": "127.0.0.1", "https": "127.0.0.1"}
-config.TIMEOUT = 10
-try:
-    twitter.load_session("tester89257")
-except:
-    twitter.login("tester89257", "ivan1234")
-    twitter.save_session()
 
+def get_twitter_top(url):
+    base_url = f"https://nitter.net/search?f=tweets&q={quote_plus(url)}"
+    driver = (
+        webdriver.Chrome()
+    )  # If you have the driver in a specific location: webdriver.Chrome(executable_path='/path/to/chromedriver')
 
-def get_tweet_info(article_url):
-    search_res = twitter.search(article_url, total=2)
-    rate_limit = search_res["api_rate_limit"]
-    if rate_limit["rate_limit_exhausted"]:
-        sleep_time = rate_limit["reset_after_datetime_object"].total_seconds() + 300
-        time.sleep(sleep_time)
-    article_tweets = []
-    for content in search_res["data"]:
-        icontent = content["content"]["itemContent"]
-        res = icontent["tweet_results"]["result"]
-        if "legacy" not in res:
-            res = res["tweet"]
-        details = res["legacy"]
+    driver.get(base_url)
 
-        user_details = res["core"]["user_results"]["result"]["legacy"]
-        views = 0
-        if "views" in res and "count" in res["views"]:
-            try:
-                views = int(res["views"]["count"])
-            except:
-                views = 0
-        t_info = {
-            "views": views,
-            "bookmark_count": details["bookmark_count"],
+    # Find elements by class name
+    tweet_elements = driver.find_elements(By.CLASS_NAME, "tweet-body")
+
+    tweets_data = []
+    for tweet in tweet_elements:
+        details = {}
+        user_details = {}
+
+        # Extracting tweet details
+        details["full_text"] = tweet.find_element(By.CLASS_NAME, "tweet-content").text
+        details["created_at"] = tweet.find_element(By.CLASS_NAME, "tweet-date").text
+
+        # Extracting tweet stats
+        stats = tweet.find_elements(By.CLASS_NAME, "tweet-stat")
+        details["reply_count"] = int(stats[0].text or 0)
+        details["retweet_count"] = int(stats[1].text or 0)
+        details["quote_count"] = int(stats[2].text or 0)
+        details["favorite_count"] = int(stats[3].text or 0)
+
+        # Extracting user details
+        user_details["name"] = tweet.find_element(By.CLASS_NAME, "fullname").text
+        user_details["screen_name"] = tweet.find_element(
+            By.CLASS_NAME, "username"
+        ).text[1:]
+
+        # Constructing the JSON object
+        tweet_data = {
+            "views": 0,  # Placeholder value, as it's not present in the provided HTML
+            "bookmark_count": 0,  # Placeholder value
             "favorite_count": details["favorite_count"],
             "quote_count": details["quote_count"],
             "reply_count": details["reply_count"],
@@ -55,16 +60,14 @@ def get_tweet_info(article_url):
             "author": {
                 "name": user_details["name"],
                 "screen_name": user_details["screen_name"],
-                "followers_count": user_details["followers_count"],
-                "friends_count": user_details["friends_count"],
+                "followers_count": 0,  # Placeholder value
+                "friends_count": 0,  # Placeholder value
             },
         }
-        t_info[
-            "url"
-        ] = f"https://twitter.com/{t_info['author']['screen_name']}/status/{res['rest_id']}"
-        article_tweets.append(t_info)
+        tweets_data.append(tweet_data)
+
     totals = {}
-    for t_info in article_tweets:
+    for t_info in tweets_data:
         for key, value in t_info.items():
             # Check if the value is numeric
             if isinstance(value, (int, float)):
@@ -76,9 +79,7 @@ def get_tweet_info(article_url):
                         full_key = f"total_{sub_key}"
                         totals[full_key] = totals.get(full_key, 0) + sub_value
 
-    time.sleep(random.randint(1, 5))
-
-    return article_tweets, totals
+    return tweets_data, totals
 
 
 def update_articles():
@@ -101,7 +102,7 @@ def update_articles():
         for article in results:
             link = article["link"]
             print(f"Getting tweets for {link}")
-            tweets, totals = get_tweet_info(link)
+            tweets, totals = get_twitter_top(link)
             collection.update_one(
                 {"_id": article["_id"]},
                 {"$set": {"tweets": tweets, "tweets_summary": totals}},
@@ -112,34 +113,8 @@ def update_articles():
         return
 
 
-schedule.every(21).minutes.do(update_articles)
+schedule.every(10).minutes.do(update_articles)
 
 while True:
     schedule.run_pending()
     time.sleep(1)
-
-# update_articles()
-
-
-# articles = collection.find(
-#     {"tweet": {"$exists": True}, "tweet_summary": {"$exists": True}}
-# )
-
-# for article in articles:
-#     collection.update_one(
-#         {"_id": article["_id"]},
-#         {"$rename": {"tweet": "tweets", "tweet_summary": "tweets_summary"}},
-#     )
-
-#     # Convert tweet.views to an integer for each tweet in the tweets array
-#     tweets = [{**tweet, "views": int(tweet["views"])} for tweet in article["tweet"]]
-#     print(tweets)
-
-#     # Calculate the total views for tweets
-#     total_views = sum(tweet["views"] for tweet in tweets)
-
-#     # Then, update the values
-#     collection.update_one(
-#         {"_id": article["_id"]},
-#         {"$set": {"tweets": tweets, "tweets_summary.views": total_views}},
-#     )
