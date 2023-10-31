@@ -1,8 +1,7 @@
-import time
 from pymongo import MongoClient, DESCENDING
 from pymongo.server_api import ServerApi
 from datetime import datetime, timedelta
-import schedule
+import time
 from urllib.parse import quote_plus
 from selenium import webdriver
 from selenium.webdriver.common.by import By
@@ -14,18 +13,13 @@ client = MongoClient(uri, server_api=ServerApi("1"))
 db = client["vc_news"]  # Name of the database
 collection = db["articles"]  # Name of the collection
 
+chrome_options = Options()
+chrome_options.add_argument("--incognito")
+d = webdriver.Chrome(options=chrome_options)
+
 
 def get_twitter_top(url):
-    print(f"Getting Twitter top for {url}")
     base_url = f"https://nitter.net/search?f=tweets&q={quote_plus(url)}"
-    #driver = (
-    #    webdriver.Chrome()
-    #)  # If you have the driver in a specific location: webdriver.Chrome(executable_path='/path/to/chromedriver')
-    chrome_options = Options()
-    chrome_options.add_argument('--headless')
-    chrome_options.add_argument('--no-sandbox')
-    chrome_options.add_argument('--disable-dev-shm-usage')
-    d = webdriver.Chrome(options=chrome_options)
     d.get(base_url)
 
     # Find elements by class name
@@ -100,7 +94,7 @@ def update_articles():
                         ]
                     },
                     {"pub_date": {"$lt": datetime.now() - timedelta(days=1)}},
-                    {"tweet": {"$exists": False}},
+                    # {"tweets": {"$exists": False}},
                 ]
             }
         ).sort("pub_date", DESCENDING)
@@ -114,15 +108,16 @@ def update_articles():
                 {"$set": {"tweets": tweets, "tweets_summary": totals}},
                 upsert=False,
             )
+            time.sleep(10)
     except Exception as e:
         print(e)
         return
 
 
-#schedule.every(10).minutes.do(update_articles)
+# schedule.every(10).minutes.do(update_articles)
 
-#while True:
-    #schedule.run_pending()
-    #time.sleep(1i)
+# while True:
+# schedule.run_pending()
+# time.sleep(1i)
 
 update_articles()
