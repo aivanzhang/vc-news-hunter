@@ -15,6 +15,9 @@ collection = db["articles"]  # Name of the collection
 
 chrome_options = Options()
 chrome_options.add_argument("--incognito")
+chrome_options.add_argument('--no-sandbox')
+chrome_options.add_argument('--headless')
+
 d = webdriver.Chrome(options=chrome_options)
 
 
