@@ -6,6 +6,7 @@ import schedule
 from urllib.parse import quote_plus
 from selenium import webdriver
 from selenium.webdriver.common.by import By
+from selenium.webdriver.chrome.options import Options
 
 uri = "mongodb+srv://ivan:9lhUkeVT3YYGVAzh@cluster0.67lpgjg.mongodb.net/?retryWrites=true&w=majority"
 # Create a new client and connect to the server
@@ -17,14 +18,18 @@ collection = db["articles"]  # Name of the collection
 def get_twitter_top(url):
     print(f"Getting Twitter top for {url}")
     base_url = f"https://nitter.net/search?f=tweets&q={quote_plus(url)}"
-    driver = (
-        webdriver.Chrome()
-    )  # If you have the driver in a specific location: webdriver.Chrome(executable_path='/path/to/chromedriver')
-
-    driver.get(base_url)
+    #driver = (
+    #    webdriver.Chrome()
+    #)  # If you have the driver in a specific location: webdriver.Chrome(executable_path='/path/to/chromedriver')
+    chrome_options = Options()
+    chrome_options.add_argument('--headless')
+    chrome_options.add_argument('--no-sandbox')
+    chrome_options.add_argument('--disable-dev-shm-usage')
+    d = webdriver.Chrome(options=chrome_options)
+    d.get(base_url)
 
     # Find elements by class name
-    tweet_elements = driver.find_elements(By.CLASS_NAME, "tweet-body")
+    tweet_elements = d.find_elements(By.CLASS_NAME, "tweet-body")
 
     tweets_data = []
     for tweet in tweet_elements:
@@ -114,8 +119,10 @@ def update_articles():
         return
 
 
-schedule.every(10).minutes.do(update_articles)
+#schedule.every(10).minutes.do(update_articles)
 
-while True:
-    schedule.run_pending()
-    time.sleep(1)
+#while True:
+    #schedule.run_pending()
+    #time.sleep(1i)
+
+update_articles()
