@@ -15,8 +15,13 @@ collection = db["articles"]  # Name of the collection
 
 chrome_options = Options()
 chrome_options.add_argument("--incognito")
-chrome_options.add_argument('--no-sandbox')
-chrome_options.add_argument('--headless')
+chrome_options.add_argument("--no-sandbox")
+chrome_options.add_argument("--window-size=1920,1080")
+chrome_options.add_argument("--disable-gpu")
+chrome_options.add_argument(
+    "user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/87.0.4280.88 Safari/537.36"
+)
+
 
 d = webdriver.Chrome(options=chrome_options)
 
@@ -106,12 +111,13 @@ def update_articles():
             link = article["link"]
             print(f"Getting tweets for {link}")
             tweets, totals = get_twitter_top(link)
+            print(f"Got {len(tweets)} tweets for {link}")
             collection.update_one(
                 {"_id": article["_id"]},
                 {"$set": {"tweets": tweets, "tweets_summary": totals}},
                 upsert=False,
             )
-            time.sleep(10)
+            # time.sleep(10)
     except Exception as e:
         print(e)
         return
