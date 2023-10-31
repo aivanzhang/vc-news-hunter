@@ -15,6 +15,7 @@ collection = db["articles"]  # Name of the collection
 
 
 def get_twitter_top(url):
+    print(f"Getting Twitter top for {url}")
     base_url = f"https://nitter.net/search?f=tweets&q={quote_plus(url)}"
     driver = (
         webdriver.Chrome()
