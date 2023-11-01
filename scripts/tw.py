@@ -102,7 +102,7 @@ def get_twitter_top(url):
 
 def update_articles():
     try:
-        results = collection.find(
+        article = collection.find_one(
             {
                 "$and": [
                     {
@@ -115,9 +115,9 @@ def update_articles():
                     {"tweets": {"$exists": False}},
                 ]
             }
-        ).sort("pub_date", DESCENDING)
+        )
 
-        for article in results:
+        while article is not None:
             link = article["link"]
             print(f"Getting tweets for {link}")
             tweets, totals = get_twitter_top(link)
@@ -127,14 +127,31 @@ def update_articles():
                 {"$set": {"tweets": tweets, "tweets_summary": totals}},
                 upsert=False,
             )
-            time.sleep(random(1, 100))
+            time.sleep(random(1, 180))
+            article = collection.find_one(
+                {
+                    "$and": [
+                        {
+                            "$or": [
+                                {"outlet": {"$in": ["tech_crunch", "information"]}},
+                                {"authors": "Dan Primack"},
+                            ]
+                        },
+                        {"pub_date": {"$lt": datetime.now() - timedelta(days=1)}},
+                        {"tweets": {"$exists": False}},
+                    ]
+                }
+            )
+
     except Exception as e:
         print(e)
         return
 
 
-schedule.every(1).day.at("00:00").do(update_articles)
+# schedule.every(1).day.at("00:00").do(update_articles)
 
-while True:
-    schedule.run_pending()
-    time.sleep(1)
+# while True:
+#     schedule.run_pending()
+#     time.sleep(1)
+
+update_articles()
