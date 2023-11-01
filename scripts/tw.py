@@ -2,6 +2,8 @@ from pymongo import MongoClient, DESCENDING
 from pymongo.server_api import ServerApi
 from datetime import datetime, timedelta
 import time
+import schedule
+from random import randint as random
 from urllib.parse import quote_plus
 from selenium import webdriver
 from selenium.webdriver.common.by import By
@@ -14,6 +16,7 @@ db = client["vc_news"]  # Name of the database
 collection = db["articles"]  # Name of the collection
 
 chrome_options = Options()
+chrome_options.add_argument("--headless")
 chrome_options.add_argument("--incognito")
 chrome_options.add_argument("--no-sandbox")
 chrome_options.add_argument("--window-size=1920,1080")
@@ -27,15 +30,21 @@ d = webdriver.Chrome(options=chrome_options)
 
 
 def get_twitter_top(url):
-    base_url = f"https://nitter.net/search?f=tweets&q={quote_plus(url)}"
+    base_url = f"https://nitter.mint.lgbt/search?f=tweets&q={quote_plus(url)}"
     d.get(base_url)
 
     # Find elements by class name
-    tweet_elements = d.find_elements(By.CLASS_NAME, "tweet-body")
+    tweet_elements = d.find_elements(By.CLASS_NAME, "timeline-item")
 
     tweets_data = []
     for tweet in tweet_elements:
         details = {}
+        details["link"] = (
+            tweet.find_element(By.CLASS_NAME, "tweet-link").get_attribute("href") or ""
+        )
+
+        details["link"] = details["link"].replace("https://nitter.mint.lgbt/", "")
+        tweet = tweet.find_element(By.CLASS_NAME, "tweet-body")
         user_details = {}
 
         # Extracting tweet details
@@ -57,6 +66,7 @@ def get_twitter_top(url):
 
         # Constructing the JSON object
         tweet_data = {
+            "url": f"https://twitter.com/{details['link']}",
             "views": 0,  # Placeholder value, as it's not present in the provided HTML
             "bookmark_count": 0,  # Placeholder value
             "favorite_count": details["favorite_count"],
@@ -102,7 +112,7 @@ def update_articles():
                         ]
                     },
                     {"pub_date": {"$lt": datetime.now() - timedelta(days=1)}},
-                    # {"tweets": {"$exists": False}},
+                    {"tweets": {"$exists": False}},
                 ]
             }
         ).sort("pub_date", DESCENDING)
@@ -117,16 +127,14 @@ def update_articles():
                 {"$set": {"tweets": tweets, "tweets_summary": totals}},
                 upsert=False,
             )
-            # time.sleep(10)
+            time.sleep(random(1, 100))
     except Exception as e:
         print(e)
         return
 
 
-# schedule.every(10).minutes.do(update_articles)
+schedule.every(1).day.at("00:00").do(update_articles)
 
-# while True:
-# schedule.run_pending()
-# time.sleep(1i)
-
-update_articles()
+while True:
+    schedule.run_pending()
+    time.sleep(1)
