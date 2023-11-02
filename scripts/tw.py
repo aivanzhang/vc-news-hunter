@@ -53,10 +53,10 @@ def get_twitter_top(url):
 
         # Extracting tweet stats
         stats = tweet.find_elements(By.CLASS_NAME, "tweet-stat")
-        details["reply_count"] = int(stats[0].text or 0)
-        details["retweet_count"] = int(stats[1].text or 0)
-        details["quote_count"] = int(stats[2].text or 0)
-        details["favorite_count"] = int(stats[3].text or 0)
+        details["reply_count"] = int(stats[0].text.replace(",", "") or 0)
+        details["retweet_count"] = int(stats[1].text.replace(",", "") or 0)
+        details["quote_count"] = int(stats[2].text.replace(",", "") or 0)
+        details["favorite_count"] = int(stats[3].text.replace(",", "") or 0)
 
         # Extracting user details
         user_details["name"] = tweet.find_element(By.CLASS_NAME, "fullname").text
