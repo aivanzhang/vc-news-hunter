@@ -30,7 +30,8 @@ d = webdriver.Chrome(options=chrome_options)
 
 
 def get_twitter_top(url):
-    base_url = f"https://nitter.mint.lgbt/search?f=tweets&q={quote_plus(url)}"
+    base_url = f"https://nitter.net/search?f=tweets&q={quote_plus(url)}"
+    print(base_url)
     d.get(base_url)
 
     # Find elements by class name
@@ -127,7 +128,7 @@ def update_articles():
                 {"$set": {"tweets": tweets, "tweets_summary": totals}},
                 upsert=False,
             )
-            time.sleep(random(1, 180))
+            time.sleep(random(30, 180))
             article = collection.find_one(
                 {
                     "$and": [
@@ -138,7 +139,7 @@ def update_articles():
                             ]
                         },
                         {"pub_date": {"$lt": datetime.now() - timedelta(days=1)}},
-                        {"tweets": {"$exists": False}},
+                        #{"tweets": {"$exists": False}},
                     ]
                 }
             )
