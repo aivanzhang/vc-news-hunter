@@ -22,16 +22,16 @@ chrome_options.add_argument("--no-sandbox")
 chrome_options.add_argument("--window-size=1920,1080")
 chrome_options.add_argument("--disable-gpu")
 chrome_options.add_argument(
-    "user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/87.0.4280.88 Safari/537.36"
+    "user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/74.0.3729.169 Safari/537.36"
 )
+chrome_options.add_argument("referer=https://www.google.com/")
 
 
 d = webdriver.Chrome(options=chrome_options)
 
 
 def get_twitter_top(url):
-    base_url = f"https://nitter.net/search?f=tweets&q={quote_plus(url)}"
-    print(base_url)
+    base_url = f"https://nitter.ktachibana.party/search?f=tweets&q={quote_plus(url)}"
     d.get(base_url)
 
     # Find elements by class name
@@ -113,9 +113,9 @@ def update_articles():
                         ]
                     },
                     {"pub_date": {"$lt": datetime.now() - timedelta(days=1)}},
-                    {"tweets": {"$exists": False}},
                 ]
-            }
+            },
+            sort=[("pub_date", DESCENDING)],
         )
 
         while article is not None:
@@ -139,7 +139,7 @@ def update_articles():
                             ]
                         },
                         {"pub_date": {"$lt": datetime.now() - timedelta(days=1)}},
-                        #{"tweets": {"$exists": False}},
+                        # {"tweets": {"$exists": False}},
                     ]
                 }
             )
