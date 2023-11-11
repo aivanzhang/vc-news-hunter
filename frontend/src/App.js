@@ -6,6 +6,7 @@ import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import "react-datepicker/dist/react-datepicker.css";
 import TopNews from "./screens/TopNews";
+import Generated from "./screens/Generated";
 
 function App() {
   return (
@@ -15,6 +16,7 @@ function App() {
         <Routes>
           <Route path="/" element={<Dashboard />} />
           <Route path="/top_news" element={<TopNews />} />
+          <Route path="/generated/:generated_id" element={<Generated />} />
         </Routes>
       </BrowserRouter>
     </ChakraProvider>

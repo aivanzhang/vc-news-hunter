@@ -37,6 +37,21 @@ function GenerateModal({ isOpen, onClose, articles }) {
   }
   const newsArticles = articles();
 
+  const calculateAICost = () => {
+    const countTokens =
+      (newsArticles
+        .map(
+          ({ title, description, _id }) =>
+            `Id: ${_id}\n\nTitle: ${title}\n\nDescription: ${description}`
+        )
+        .join("\n--------------------\n")
+        .split(" ").length +
+        150) /
+      1000.0;
+
+    return countTokens * 0.001 + countTokens * 5 * 0.002;
+  };
+
   const generateNewsletter = async () => {
     try {
       setLoading(true);
@@ -44,6 +59,7 @@ function GenerateModal({ isOpen, onClose, articles }) {
         articleIds: newsArticles.map((article) => article._id),
       });
       const data = response.data;
+      window.open("/generated/" + data.generated_id, "_blank");
     } catch (error) {
       console.error("Error fetching statuses:", error);
     }
@@ -56,7 +72,7 @@ function GenerateModal({ isOpen, onClose, articles }) {
       <ModalContent maxW="50%">
         <ModalHeader>Selected Articles for Newletter</ModalHeader>
         <ModalCloseButton />
-        <ModalBody maxH="lg" overflow="scroll">
+        <ModalBody maxH="md" overflow="scroll">
           {newsArticles.map((item, index) => (
             <VStack
               key={index}
@@ -119,6 +135,14 @@ function GenerateModal({ isOpen, onClose, articles }) {
           >
             Generate Newsletter
           </Button>
+          <Box h="4" />
+          <Text textAlign="center">
+            <strong>
+              Approximate AI cost: ${calculateAICost().toFixed(10)}
+            </strong>
+            <br />
+            (Note that the actual cost may be higher)
+          </Text>
           <Box h="4" />
           <Text textAlign="center">
             This will use the article's title and description to generate a Eric

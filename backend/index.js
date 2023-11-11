@@ -1,6 +1,11 @@
 const express = require("express");
 const mongoose = require("mongoose");
+const OpenAI = require("openai");
 const authors = require("./authors.json");
+
+const openai = new OpenAI({
+  apiKey: "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",
+});
 
 // Create a schema for your data
 const newsSchema = new mongoose.Schema({
@@ -23,6 +28,12 @@ const newsSchema = new mongoose.Schema({
 const onlineSchema = new mongoose.Schema({
   outlet: String,
   status: Boolean,
+});
+
+const generatedSchema = new mongoose.Schema({
+  articleIds: [String],
+  generated: String,
+  date: Date,
 });
 
 // Connect to MongoDBm
@@ -235,7 +246,8 @@ app.post("/generateNewsletter", async (req, res) => {
     _id: { $in: articleIds },
   });
   const cleanedArticles = articles.map(
-    ({ title, link, authors, description, pub_date, outlet }) => ({
+    ({ _id, title, link, authors, description, pub_date, outlet }) => ({
+      _id,
       title,
       link,
       authors,
@@ -245,8 +257,66 @@ app.post("/generateNewsletter", async (req, res) => {
     })
   );
 
-  console.log(cleanedArticles);
-  res.status(200).json({ message: "Successfully generated newsletter" });
+  const prompt =
+    "Use the following information to create a fun, interesting, and professional roundup startup and venture capital newsletter post that gives subscribers insight into what the most important news from this past week were. Make sure each article has a good title and a minimum 2 paragraph and maximum 4 paragraph description. Each article is separated by dashes. Add a maximum of 5 emojis if it makes sense. Make sure that each title has the right article link. It is very important that you get these instructions right. Generate the markdown. \n\n" +
+    cleanedArticles
+      .map(
+        ({ title, description, link }) =>
+          `Link: ${link}\n\nTitle: ${title}\n\nDescription: ${description}`
+      )
+      .join("\n--------------------\n");
+
+  const completion = await openai.chat.completions.create({
+    messages: [
+      {
+        role: "system",
+        content:
+          "You are Eric Newcomer, a journalist known for his work covering technology and startups. You are writing a weekly roundup of interesting tech and startup news for your newsletter.",
+      },
+      { role: "user", content: prompt },
+    ],
+    model: "gpt-3.5-turbo",
+    max_tokens: prompt.split(" ").length * 4,
+  });
+
+  const post = completion.choices[0].message.content;
+
+  const GeneratedCollection = mongoose.model("generated", generatedSchema);
+  const newGenerated = new GeneratedCollection({
+    articleIds: cleanedArticles.map(({ _id }) => _id),
+    generated: post,
+    date: new Date(),
+  });
+  await newGenerated.save();
+
+  res.status(200).json({
+    message: "Successfully generated newsletter",
+    generated_id: newGenerated._id,
+  });
+});
+
+app.post("/getGeneratedNewsletter", async (req, res) => {
+  const { generated_id } = req.body;
+
+  const GeneratedCollection = mongoose.model("generated", generatedSchema);
+  const generated = await GeneratedCollection.findById(generated_id);
+  const newsSourceCollection = mongoose.model("articles", newsSchema);
+  const articles = await newsSourceCollection.find({
+    _id: { $in: generated.articleIds },
+  });
+  const cleanedArticles = articles.map(
+    ({ _id, title, link, authors, description, pub_date, outlet }) => ({
+      _id,
+      title,
+      link,
+      authors,
+      description,
+      pub_date,
+      outlet,
+    })
+  );
+
+  res.status(200).json({ generated, articles: cleanedArticles });
 });
 
 // Start the server
