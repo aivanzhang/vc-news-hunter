@@ -258,7 +258,7 @@ app.post("/generateNewsletter", async (req, res) => {
   );
 
   const prompt =
-    "Use the following information to create a fun, interesting, and professional roundup startup and venture capital newsletter post that gives subscribers insight into what the most important news from this past week were. Make sure each article has a good title and a minimum 2 paragraph and maximum 4 paragraph description. E Each article is separated by dashes. Add a maximum of 5 emojis if it makes sense. Make sure that each title has the right article link. It is very important that each article is in the roundup. If it is missing the description, infer from the title. Generate the markdown. \n\n" +
+    "Use the following information to create a fun, interesting, and professional roundup startup and venture capital newsletter post that gives subscribers insight into what the most important news from this past week were. Make sure each article has a good title and a minimum 2 paragraph and maximum 4 paragraph description. E Each article is separated by dashes. Add a maximum of 5 emojis if it makes sense. Make sure that each title has the right article link. It is very important that each article is in the roundup. If it is missing the description, infer from the title. Make sure never to forget the link. Generate the markdown. \n\n" +
     cleanedArticles
       .map(
         ({ title, description, link }) =>
