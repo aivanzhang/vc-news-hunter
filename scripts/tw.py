@@ -139,9 +139,10 @@ def update_articles():
                             ]
                         },
                         {"pub_date": {"$lt": datetime.now() - timedelta(days=1)}},
-                        # {"tweets": {"$exists": False}},
-                    ]
-                }
+                        {"tweets": {"$exists": False}},
+                    ],
+                },
+                sort=[("pub_date", DESCENDING)],
             )
 
     except Exception as e:
