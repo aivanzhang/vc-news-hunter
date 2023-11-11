@@ -175,7 +175,8 @@ async def fetch_nyt():
             link = entry.link
             description = entry.description
             authors = [author.strip() for author in entry.author.split(",")]
-            tags = [tag.term for tag in entry.tags]
+            tags = []
+            #[tag.term for tag in entry.tags]
             pub_date = parser.parse(entry.published)
             article = {
                 "title": title,
