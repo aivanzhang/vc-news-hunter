@@ -44,7 +44,7 @@ mongoose
     {
       useNewUrlParser: true,
       useUnifiedTopology: true,
-    }
+    },
   )
   .then(() => {
     console.log("Connected to MongoDB");
@@ -144,7 +144,7 @@ app.post("/get", (req, res) => {
 
 app.post("/top", (req, res) => {
   // Get data from the request body
-  const { daysOld, numArticles, sortByTwitter } = req.body;
+  const { daysOld, numArticles } = req.body;
   const newsSourceCollection = mongoose.model("articles", newsSchema);
   let dateRangeQuery = {};
   dateRangeQuery["pub_date"] = {
@@ -153,48 +153,30 @@ app.post("/top", (req, res) => {
   dateRangeQuery["Sci/Tech"] = { $gte: 0.5 };
   dateRangeQuery["Business"] = { $gte: 0.2 };
   dateRangeQuery["hidden"] = { $ne: true };
-  (sortByTwitter
-    ? newsSourceCollection
-        .aggregate([
-          {
-            $match: dateRangeQuery, // This is equivalent to .find(dateRangeQuery)
+  newsSourceCollection
+    .aggregate([
+      {
+        $match: dateRangeQuery, // This is equivalent to .find(dateRangeQuery)
+      },
+      {
+        $addFields: {
+          // Calculate the popularity score for each document
+          popularityScore: {
+            $add: [
+              { $multiply: ["$Business", 50] },
+              { $multiply: ["$Sci/Tech", 30] },
+            ],
           },
-          {
-            $addFields: {
-              // Calculate the popularity score for each document
-              popularityScore: {
-                $add: [
-                  "$tweets_summary.views",
-                  { $multiply: ["$tweets_summary.bookmark_count", 5] },
-                  { $multiply: ["$tweets_summary.favorite_count", 10] },
-                  { $multiply: ["$tweets_summary.quote_count", 15] },
-                  { $multiply: ["$tweets_summary.reply_count", 5] },
-                  { $multiply: ["$tweets_summary.retweet_count", 10] },
-                  {
-                    $multiply: ["$tweets_summary.total_followers_count", 0.1],
-                  },
-                  {
-                    $multiply: ["$tweets_summary.total_friends_count", 0.05],
-                  },
-                  { $multiply: ["$Business", 50] },
-                  { $multiply: ["$Sci/Tech", 30] },
-                ],
-              },
-            },
-          },
-          {
-            $sort: { popularityScore: -1, pub_date: -1 }, // Sort by popularity first, then by publication date
-          },
-          {
-            $limit: numArticles,
-          },
-        ])
-        .exec()
-    : newsSourceCollection
-        .find(dateRangeQuery)
-        .sort({ pub_date: -1 })
-        .limit(numArticles)
-  )
+        },
+      },
+      {
+        $sort: { popularityScore: -1, pub_date: -1 }, // Sort by popularity first, then by publication date
+      },
+      {
+        $limit: numArticles,
+      },
+    ])
+    .exec()
     .then((docs) => {
       res.status(200).json({ articles: docs });
     })
@@ -254,7 +236,7 @@ app.post("/generateNewsletter", async (req, res) => {
       description,
       pub_date,
       outlet,
-    })
+    }),
   );
 
   const prompt =
@@ -262,7 +244,7 @@ app.post("/generateNewsletter", async (req, res) => {
     cleanedArticles
       .map(
         ({ title, description, link }) =>
-          `Link: ${link}\n\nTitle: ${title}\n\nDescription: ${description}`
+          `Link: ${link}\n\nTitle: ${title}\n\nDescription: ${description}`,
       )
       .join("\n--------------------\n");
 
@@ -313,7 +295,7 @@ app.post("/getGeneratedNewsletter", async (req, res) => {
       description,
       pub_date,
       outlet,
-    })
+    }),
   );
 
   res.status(200).json({ generated, articles: cleanedArticles });

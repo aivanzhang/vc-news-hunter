@@ -43,7 +43,6 @@ const TopNews = () => {
   const [hiddenArticles, setHiddenArticles] = useState(new Set());
   const [daysOld, setDaysOld] = useState(7);
   const [numArticles, setNumArticles] = useState(10);
-  const [sortByTwitter, setSortByTwitter] = useState(true);
   const [newsletterArticles, setNewsletterArticles] = useState(new Set());
 
   const getTop = async () => {
@@ -53,7 +52,6 @@ const TopNews = () => {
       const response = await axios.post("/top", {
         daysOld,
         numArticles,
-        sortByTwitter,
       });
       const fetchedNews = response.data;
       setNews(fetchedNews.articles);
@@ -79,7 +77,7 @@ const TopNews = () => {
   useEffect(() => {
     getTop();
     //eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [daysOld, numArticles, sortByTwitter]);
+  }, [daysOld, numArticles]);
 
   const handleDaysChangeEnd = (value) => {
     if (value < 2) {
@@ -105,7 +103,7 @@ const TopNews = () => {
             const articles = [];
             for (const article of newsletterArticles) {
               articles.push(
-                news.find((newsArticle) => newsArticle._id === article)
+                news.find((newsArticle) => newsArticle._id === article),
               );
             }
             return articles;
@@ -151,17 +149,6 @@ const TopNews = () => {
                   </SliderThumb>
                 </Slider>
               </Box>
-            </HStack>
-            <HStack w="100%" spacing={20}>
-              <Wrap spacing={3}>
-                <Checkbox
-                  isChecked={sortByTwitter}
-                  colorScheme="primary"
-                  onChange={() => setSortByTwitter((prev) => !prev)}
-                >
-                  Sort by Twitter Popularity
-                </Checkbox>
-              </Wrap>
             </HStack>
             {newsletterArticles.size > 0 && (
               <Button
@@ -215,7 +202,7 @@ const TopNews = () => {
                       onClick={(e) => {
                         e.stopPropagation();
                         const newNewsletterArticles = new Set(
-                          newsletterArticles
+                          newsletterArticles,
                         );
                         if (newNewsletterArticles.has(item._id)) {
                           newNewsletterArticles.delete(item._id);
@@ -292,7 +279,7 @@ const TopNews = () => {
                     ))}
                   </HStack>
                 </VStack>
-              )
+              ),
           )}
         </VStack>
       </HStack>
