@@ -2,7 +2,6 @@ import {
   Badge,
   Box,
   Button,
-  Checkbox,
   HStack,
   Heading,
   IconButton,
@@ -13,7 +12,6 @@ import {
   Spacer,
   Text,
   VStack,
-  Wrap,
 } from "@chakra-ui/react";
 import { useEffect, useState } from "react";
 import axios from "axios";
