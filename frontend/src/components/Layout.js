@@ -32,9 +32,9 @@ function Layout({ children, backButton }) {
             </Link>
           </VStack>
           <Spacer />
-          <Button colorScheme="primary" onClick={() => navigate("/top_news")}>
+          {/* <Button colorScheme="primary" onClick={() => navigate("/top_news")}>
             Top News Articles (Beta)
-          </Button>
+          </Button> */}
         </HStack>
         <Box h="2" />
         {children}
